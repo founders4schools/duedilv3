@@ -1,0 +1,10 @@
+Filter Name,Type,Description
+locale,string,This terms accepts only the values uk or roi.
+location,string,This term accepts the name of a city and/or the address.
+postcode,string,This term accepts a valid uk postcode.
+sic_code,integer,sic_code. This term accepts only the standard SIC 03 code
+sic_2007_code,integer,sic_2007_code. This term accepts only the standard SIC 07 code
+status,string,"This term accepts only active, dissolved, in receivership or liquidation queries."
+currency,float,This term accepts only the value eur or gbp
+keywords,string,Search keywords
+name,string,The name of the company you’re looking for. This field must be a string.

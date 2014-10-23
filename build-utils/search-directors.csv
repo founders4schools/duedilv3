@@ -1,0 +1,8 @@
+Field Name,Type,Description
+name,string,This field must be a string that contains the director’s name.
+gender,string,This term accepts only the value M or F
+title,string,View all available titles.
+nationality,string,View all available nationalities.
+secretarial,boolean,This is a boolean field; the values accepted are true or false
+corporate,boolean,This is a boolean field; the values accepted are true or false
+disqualified,string,This is a boolean field; the values accepted are true or false
