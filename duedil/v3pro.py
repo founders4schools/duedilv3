@@ -16,6 +16,10 @@
 #  under the License.
 #
 
+import json
+
+# Here are all the terms available in the companies filters parameter.
+
 LOCALE = "locale" # string
 # This terms accepts only the values uk or roi.
 
@@ -43,7 +47,7 @@ KEYWORDS = "keywords" # string
 NAME = "name" # string
 # The name of the company you’re looking for. This field must be a string.
 
-COMPANY_FILTERS = [
+COMPANY_TERM_FILTERS = [
     LOCALE,
     LOCATION,
     POSTCODE,
@@ -231,7 +235,7 @@ CORPORATE = "corporate" # boolean
 DISQUALIFIED = "disqualified" # string
 # This is a boolean field; the values accepted are true or false
 
-DIRECTOR_FILTERS = [
+DIRECTOR_TERM_FILTERS = [
     NAME,
     GENDER,
     TITLE,
@@ -347,3 +351,38 @@ class Client(object):
             self._url = 'http://duedil.io/v3/sandbox'
         else:
             self._url = 'http://duedil.io/v3'
+
+    def search_company(self, **kwargs):
+        '''
+        Conduct advanced searches across all companies registered in UK & Ireland.
+        Apply any combination of 44 different filters
+
+        The parameter filters supports two different types of queries:
+            * the “range” type (ie, a numeric range) and
+            * the “terms” type (for example, an individual company name).
+
+        For the range filter, you have to pass an array;
+        for the terms filter, you just pass a string.
+
+        The range type is used when you want to limit the results to a particular range of results.
+
+        You can order the results based on the ranges using the parameter orderBy.
+        '''
+
+
+
+
+class Company(object):
+
+    def __init__(self, api_key, id, locale, name=None, sandbox=False):
+        self.api_key = api_key
+        self.id = id
+        self.locale = locale
+        if sandbox:
+            self._url = 'http://duedil.io/v3/sandbox/%s/companies/%s' %(locale, id)
+        else:
+            self._url = 'http://duedil.io/v3/%s/companies/%s' %(locale, id)
+        if name:
+            self.name = name
+        else:
+            self.name = None
