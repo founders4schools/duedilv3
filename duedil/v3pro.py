@@ -17,6 +17,8 @@
 #
 
 import json
+import urllib, urllib2
+
 
 # Here are all the terms available in the companies filters parameter.
 
@@ -347,12 +349,17 @@ class Client(object):
 
     def __init__(self, api_key, sandbox=False):
         self.api_key = api_key
+        self.sandbox = sandbox
         if sandbox:
             self._url = 'http://duedil.io/v3/sandbox'
         else:
             self._url = 'http://duedil.io/v3'
 
-    def search_company(self, **kwargs):
+    @property
+    def url(self):
+        return self._url
+
+    def search_company(self, order_by=None, limit=None, offset=None,  **kwargs):
         '''
         Conduct advanced searches across all companies registered in UK & Ireland.
         Apply any combination of 44 different filters
@@ -367,9 +374,50 @@ class Client(object):
         The range type is used when you want to limit the results to a particular range of results.
 
         You can order the results based on the ranges using the parameter orderBy.
+
+        http://duedil.io/v3/uk/companies/06999618/shareholders?orderBy={"field":"number","direction":"desc"}
         '''
+        data = {'api_key': self.api_key}
+        assert(kwargs)
+        for arg in kwargs:
+            assert(arg in COMPANY_TERM_FILTERS + COMPANY_RANGE_FILTERS)
+            if arg in COMPANY_TERM_FILTERS:
+                # this must be  a string
+                assert(isinstance(kwargs[arg], basestring))
+            elif arg in COMPANY_RANGE_FILTERS:
+                # array of two numbers
+                assert(isinstance(kwargs[arg], (list,tuple)))
+                assert(len(kwargs[arg]) == 2)
+                for v in kwargs[arg]:
+                    assert(isinstance(v, (int, float)))
+        data['filters'] = json.dumps(kwargs)
+        if order_by:
+            assert(isinstance(order_by, dict))
+            assert('field' in order_by)
+            assert(order_by['field'] in COMPANY_TERM_FILTERS + COMPANY_RANGE_FILTERS)
+            if order_by.get('direction'):
+                assert(order_by['direction'] in ['asc', 'desc'])
+            data['orderBy'] = json.dumps(order_by)
+        if limit:
+            assert(isinstance(limit, int))
+            data['limit'] = limit
+        if offset:
+            assert(isinstance(offset, int))
+            data['offset'] = offset
+        print self.url + '/companies?' + urllib.urlencode(data)
+        return json.load(urllib2.urlopen( self.url + '/companies?' + urllib.urlencode(data)))
 
+    def search_director(self, **kwargs):
+        '''
+        This “Director search endpoint” is similar to the
+        “Company search endpoint”, though with some different ranges and
+        terms.
 
+        Searching by financial range will return directors who have a
+        directorship at a company fulfilling that range.
+
+        NB: The location filter is not available for director search.
+        '''
 
 
 class Company(object):
@@ -377,6 +425,8 @@ class Company(object):
     def __init__(self, api_key, id, locale, name=None, sandbox=False):
         self.api_key = api_key
         self.id = id
+        self.sandbox = sandbox
+        assert(locale in ['uk', 'roi'])
         self.locale = locale
         if sandbox:
             self._url = 'http://duedil.io/v3/sandbox/%s/companies/%s' %(locale, id)
@@ -386,3 +436,34 @@ class Company(object):
             self.name = name
         else:
             self.name = None
+
+        @property
+        def url(self):
+            return self._url
+
+
+        @property
+        def registered_address(self):
+            if self._registered_address:
+                return self._registered_address
+            else:
+                self._registered_address = self._get('registered-address')
+
+        '''
+        previous-company-names
+        industries
+        shareholders
+        bank-accounts
+        accounts
+        documents
+        subsidiaries
+        parent
+        directors
+        directorships
+        mortgages
+        service-addresses
+        '''
+
+
+
+
