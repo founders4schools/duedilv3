@@ -16,6 +16,8 @@
 #  under the License.
 #
 
+from __future__ import print_function
+
 import json
 import urllib, urllib2
 
@@ -602,7 +604,7 @@ class Company(object):
     def _set_attributes(self, missing, **kwargs):
         for k,v in kwargs.items():
             if not k in self._allowed_attributes:
-                print "'%s'," %k
+                print ("'%s'," %k)
             #assert(k in self._allowed_attributes)
             self.__setattr__(k,v)
         if missing:
