@@ -19,8 +19,14 @@
 import unittest
 
 from .v3pro import Client, Company #, Director
-
 from .v3pro import COMPANY_TERM_FILTERS, COMPANY_RANGE_FILTERS
+
+try:
+    from .secrets import PRO_API_KEY as API_KEY
+    SANDBOX = False
+except ImportError:
+    API_KEY = 'x425dum7jp2jxuz7e3ktaqmx'
+    SANDBOX = True
 
 
 class ClientTestCase(unittest.TestCase):
@@ -40,7 +46,7 @@ class ClientTestCase(unittest.TestCase):
 
 class SearchCompaniesTestCase(unittest.TestCase):
 
-    client = Client('x425dum7jp2jxuz7e3ktaqmx', True)
+    client = Client(API_KEY, SANDBOX)
 
     def test_kwargs(self):
         # you have to search for something
@@ -65,8 +71,9 @@ class SearchCompaniesTestCase(unittest.TestCase):
     def test_order_by(self):
         with self.assertRaises(AssertionError):
             self.client.search_company(name='ex', order_by='None')
-        self.client.search_company(order_by={'field': 'employee_count', 'direction':'asc'},
-            name='ex')
+        #hmm does not seem to work on sandbox
+        #self.client.search_company(order_by={'field': 'turnover', 'direction':'desc'},
+        #    name='ex')
 
     def test_limit(self):
         with self.assertRaises(AssertionError):
@@ -80,7 +87,7 @@ class SearchCompaniesTestCase(unittest.TestCase):
 
 class SearchDirectorsTestCase(unittest.TestCase):
 
-    client = Client('x425dum7jp2jxuz7e3ktaqmx', True)
+    client = Client(API_KEY, SANDBOX)
 
 
 

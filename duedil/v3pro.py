@@ -19,6 +19,17 @@
 import json
 import urllib, urllib2
 
+try:
+    long
+except NameError:
+    # Python 3
+    long = int
+
+try:
+    unicode
+except NameError:
+    # Python 3
+    basestring = unicode = str
 
 # Here are all the terms available in the companies filters parameter.
 
@@ -345,109 +356,115 @@ DIRECTOR_RANGE_FILTERS = [
 
 
 
-class Client(object):
+class Company(object):
 
-    def __init__(self, api_key, sandbox=False):
+    allowed_attributes = [
+        'trading_address_postcode',
+        'directorships_closed_director',
+        'sic_description',
+        'sic2007code',
+        'sic_codes_count',
+        'accounts_retained_profit',
+        'accounts_trade_creditors',
+        'accounts_url',
+        'company_type',
+        'accounts_date',
+        'accounts_liabilities_current',
+        'reg_tps',
+        'incorporation_date',
+        'accounts_currency',
+        'id',
+        'latest_accounts_date',
+        'accounts_paid_up_equity',
+        'accounts_liabilities_total',
+        'reg_address_postcode',
+        'trading_address2',
+        'trading_address3',
+        'directorships_closed_secretary',
+        'accounts_net_worth',
+        'directorships_retired',
+        'trading_address4',
+        'last_update',
+        'documents_url',
+        'accounts_profit_after_tax',
+        'directorships_closed',
+        'accounts_audit_fees',
+        'accounts_assets_net',
+        'status',
+        'credit_rating_latest_description',
+        'description',
+        'directors_url',
+        'accounts_trade_debtors',
+        'accounts_type',
+        'accounts_filing_date',
+        'accounts_pre_tax_profit',
+        'directorships_retired_secretary',
+        'accounts_turnover',
+        'accounts_months',
+        'trading_address1',
+        'sic_code',
+        'accounts_liabilities_misc_current',
+        'name',
+        'accounts_capital_employed',
+        'reg_area_code',
+        'latest_annual_return_date',
+        'accounts_operating_profits',
+        'accounts_assets_total_current',
+        'reg_address4',
+        'accounts_shareholder_funds',
+        'directorships_url',
+        'accounts_consolidated',
+    ]
+
+
+
+    def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
         self.api_key = api_key
+        self.id = id
+        assert(locale in ['uk', 'roi'])
+        self.locale = locale
         self.sandbox = sandbox
         if sandbox:
-            self._url = 'http://duedil.io/v3/sandbox'
+            self._url = 'http://duedil.io/v3/sandbox/%s/companies/%s' %(locale, id)
         else:
-            self._url = 'http://duedil.io/v3'
+            self._url = 'http://duedil.io/v3/%s/companies/%s' %(locale, id)
+        self._set_attributes(**kwargs)
+
+    def _set_attributes(self, **kwargs):
+        for k,v in kwargs.items():
+            assert(k in self.allowed_attributes)
+            self.__setattr__(k,v)
+
+    def __getattribute__(self, name):
+        try:
+            return super( Company, self).__getattribute__(name)
+        except AttributeError as e:
+            if name in self.allowed_attributes:
+                self.get()
+            return super( Company, self).__getattribute__(name)
+
+    def get(self, attr=None):
+        if attr:
+            pass
+        else:
+            data = {'api_key': self.api_key}
+            result = json.load(urllib2.urlopen(self.url + '?' + urllib.urlencode(data)))
+            assert(result['response'].pop('id') == self.id)
+            self._set_attributes(**result['response'])
+            return result
+
 
     @property
     def url(self):
         return self._url
 
-    def search_company(self, order_by=None, limit=None, offset=None,  **kwargs):
-        '''
-        Conduct advanced searches across all companies registered in UK & Ireland.
-        Apply any combination of 44 different filters
 
-        The parameter filters supports two different types of queries:
-            * the “range” type (ie, a numeric range) and
-            * the “terms” type (for example, an individual company name).
-
-        For the range filter, you have to pass an array;
-        for the terms filter, you just pass a string.
-
-        The range type is used when you want to limit the results to a particular range of results.
-
-        You can order the results based on the ranges using the parameter orderBy.
-
-        http://duedil.io/v3/uk/companies/06999618/shareholders?orderBy={"field":"number","direction":"desc"}
-        '''
-        data = {'api_key': self.api_key}
-        assert(kwargs)
-        for arg in kwargs:
-            assert(arg in COMPANY_TERM_FILTERS + COMPANY_RANGE_FILTERS)
-            if arg in COMPANY_TERM_FILTERS:
-                # this must be  a string
-                assert(isinstance(kwargs[arg], basestring))
-            elif arg in COMPANY_RANGE_FILTERS:
-                # array of two numbers
-                assert(isinstance(kwargs[arg], (list,tuple)))
-                assert(len(kwargs[arg]) == 2)
-                for v in kwargs[arg]:
-                    assert(isinstance(v, (int, float)))
-        data['filters'] = json.dumps(kwargs)
-        if order_by:
-            assert(isinstance(order_by, dict))
-            assert('field' in order_by)
-            assert(order_by['field'] in COMPANY_TERM_FILTERS + COMPANY_RANGE_FILTERS)
-            if order_by.get('direction'):
-                assert(order_by['direction'] in ['asc', 'desc'])
-            data['orderBy'] = json.dumps(order_by)
-        if limit:
-            assert(isinstance(limit, int))
-            data['limit'] = limit
-        if offset:
-            assert(isinstance(offset, int))
-            data['offset'] = offset
-        print self.url + '/companies?' + urllib.urlencode(data)
-        return json.load(urllib2.urlopen( self.url + '/companies?' + urllib.urlencode(data)))
-
-    def search_director(self, **kwargs):
-        '''
-        This “Director search endpoint” is similar to the
-        “Company search endpoint”, though with some different ranges and
-        terms.
-
-        Searching by financial range will return directors who have a
-        directorship at a company fulfilling that range.
-
-        NB: The location filter is not available for director search.
-        '''
-
-
-class Company(object):
-
-    def __init__(self, api_key, id, locale, name=None, sandbox=False):
-        self.api_key = api_key
-        self.id = id
-        self.sandbox = sandbox
-        assert(locale in ['uk', 'roi'])
-        self.locale = locale
-        if sandbox:
-            self._url = 'http://duedil.io/v3/sandbox/%s/companies/%s' %(locale, id)
+    @property
+    def registered_address(self):
+        if self._registered_address:
+            return self._registered_address
         else:
-            self._url = 'http://duedil.io/v3/%s/companies/%s' %(locale, id)
-        if name:
-            self.name = name
-        else:
-            self.name = None
-
-        @property
-        def url(self):
-            return self._url
-
-
-        @property
-        def registered_address(self):
-            if self._registered_address:
-                return self._registered_address
-            else:
-                self._registered_address = self._get('registered-address')
+            self._registered_address = self._get('registered-address')
 
         '''
         previous-company-names
@@ -463,6 +480,90 @@ class Company(object):
         mortgages
         service-addresses
         '''
+
+
+
+class Client(object):
+
+    last_company_response = {}
+    last_director_response = {}
+
+    def __init__(self, api_key, sandbox=False):
+        self.api_key = api_key
+        self.sandbox = sandbox
+        if sandbox:
+            self._url = 'http://duedil.io/v3/sandbox'
+        else:
+            self._url = 'http://duedil.io/v3'
+
+    @property
+    def url(self):
+        return self._url
+
+    def search_company(self, order_by=None, limit=None, offset=None, **kwargs):
+        '''
+        Conduct advanced searches across all companies registered in UK & Ireland.
+        Apply any combination of 44 different filters
+
+        The parameter filters supports two different types of queries:
+            * the “range” type (ie, a numeric range) and
+            * the “terms” type (for example, an individual company name).
+
+        For the range filter, you have to pass an array;
+        for the terms filter, you just pass a string.
+
+        The range type is used when you want to limit the results to a particular range of results.
+
+        You can order the results based on the ranges using the parameter orderBy.
+        '''
+        data = {'api_key': self.api_key}
+        assert(kwargs)
+        for arg in kwargs:
+            assert(arg in COMPANY_TERM_FILTERS + COMPANY_RANGE_FILTERS)
+            if arg in COMPANY_TERM_FILTERS:
+                # this must be  a string
+                assert(isinstance(kwargs[arg], basestring))
+            elif arg in COMPANY_RANGE_FILTERS:
+                # array of two numbers
+                assert(isinstance(kwargs[arg], (list,tuple)))
+                assert(len(kwargs[arg]) == 2)
+                for v in kwargs[arg]:
+                    assert(isinstance(v, (int, long, float)))
+        data['filters'] = json.dumps(kwargs)
+        if order_by:
+            assert(isinstance(order_by, dict))
+            assert('field' in order_by)
+            assert(order_by['field'] in COMPANY_TERM_FILTERS + COMPANY_RANGE_FILTERS)
+            if order_by.get('direction'):
+                assert(order_by['direction'] in ['asc', 'desc'])
+            data['orderBy'] = json.dumps(order_by)
+        if limit:
+            assert(isinstance(limit, int))
+            data['limit'] = limit
+        if offset:
+            assert(isinstance(offset, int))
+            data['offset'] = offset
+        results = json.load(urllib2.urlopen('%s/companies?%s'
+                %(self.url, urllib.urlencode(data))))
+        self.last_company_response = results
+        return results
+
+
+
+    def search_director(self, **kwargs):
+        '''
+        This “Director search endpoint” is similar to the
+        “Company search endpoint”, though with some different ranges and
+        terms.
+
+        Searching by financial range will return directors who have a
+        directorship at a company fulfilling that range.
+
+        NB: The location filter is not available for director search.
+        '''
+
+
+
 
 
 
