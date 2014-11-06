@@ -636,8 +636,9 @@ class Company(object):
         get results from duedil
         """
         data = {'api_key': self.api_key, 'nullValue':None}
-        result = json.load(urlopen('%s?%s'
-            %(self.url, urlencode(data))))
+        req = urlopen('%s?%s'
+            %(self.url, urlencode(data)))
+        result = json.loads(req.read().decode('utf-8'))
         assert(result['response'].pop('id') == self.id)
         self._set_attributes(missing=True, **result['response'])
         return result
@@ -732,8 +733,9 @@ class Client(object):
         if offset:
             assert(isinstance(offset, int))
             data['offset'] = offset
-        results = json.load(urlopen('%s/companies?%s'
-                %(self.url, urlencode(data))))
+        req = urlopen('%s/companies?%s'
+                %(self.url, urlencode(data)))
+        results = json.loads(req.read().decode('utf-8'))
         self.last_company_response = results
         companies = []
         for r in results['response']['data']:
