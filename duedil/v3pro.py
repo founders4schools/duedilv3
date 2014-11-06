@@ -19,7 +19,15 @@
 from __future__ import print_function
 
 import json
-import urllib, urllib2
+
+try:
+    # For Python 3.0 and later
+    from urllib.request import urlopen
+    from urllib.parse import urlencode
+except ImportError:
+    # Fall back to Python 2's urllib2
+    from urllib2 import urlopen
+    from urllib import urlencode
 
 try:
     long
@@ -628,8 +636,8 @@ class Company(object):
         get results from duedil
         """
         data = {'api_key': self.api_key, 'nullValue':None}
-        result = json.load(urllib2.urlopen('%s?%s'
-            %(self.url, urllib.urlencode(data))))
+        result = json.load(urlopen('%s?%s'
+            %(self.url, urlencode(data))))
         assert(result['response'].pop('id') == self.id)
         self._set_attributes(missing=True, **result['response'])
         return result
@@ -724,8 +732,8 @@ class Client(object):
         if offset:
             assert(isinstance(offset, int))
             data['offset'] = offset
-        results = json.load(urllib2.urlopen('%s/companies?%s'
-                %(self.url, urllib.urlencode(data))))
+        results = json.load(urlopen('%s/companies?%s'
+                %(self.url, urlencode(data))))
         self.last_company_response = results
         companies = []
         for r in results['response']['data']:
