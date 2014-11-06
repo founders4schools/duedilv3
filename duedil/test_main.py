@@ -52,7 +52,7 @@ class SearchCompaniesTestCase(unittest.TestCase):
         # you have to search for something
         with self.assertRaises(AssertionError):
             self.client.search_company()
-         # search terms are strings
+        # search terms are strings
         with self.assertRaises(AssertionError):
             self.client.search_company(bla=2)
         # search ranges have a upper and lower
@@ -85,6 +85,11 @@ class SearchCompaniesTestCase(unittest.TestCase):
             self.client.search_company(name='ex', offset='0')
         self.client.search_company(name='ex', offset=0)
 
+    def test_results(self):
+        companies, raw = self.client.search_company(name='ex')
+        self.assertIsInstance(companies[0], Company)
+        self.assertIsInstance(raw, dict)
+
 class SearchDirectorsTestCase(unittest.TestCase):
 
     client = Client(API_KEY, SANDBOX)
@@ -93,7 +98,28 @@ class SearchDirectorsTestCase(unittest.TestCase):
 
 class CompanyTestCase(unittest.TestCase):
 
-    pass
+    if SANDBOX:
+        company_id = '325401bd2f2ea29373c533eb1587e5fcab36f13b'
+    else:
+        company_id = '06999618'
+
+    def test_get(self):
+        company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
+        self.assertEqual(len(company.__dict__), 5)
+        company.get()
+        self.assertEqual(len(company.__dict__), 130)
+
+    def test_init(self):
+        company = Company(API_KEY, self.company_id, 'uk', SANDBOX, name='DUEDIL LIMITED')
+        self.assertEqual(company.name, 'DUEDIL LIMITED')
+        self.assertEqual(company.id, self.company_id)
+        self.assertEqual(company.locale, 'uk')
+
+    def test_lazy_load(self):
+        company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
+        self.assertEqual(len(company.__dict__), 5)
+        self.assertNotEqual(company.name, 0)
+        self.assertEqual(len(company.__dict__), 130)
 
 class DirectorTestCase(unittest.TestCase):
 

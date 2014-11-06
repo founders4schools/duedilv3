@@ -605,9 +605,10 @@ class Company(object):
                 print "'%s'," %k
             #assert(k in self._allowed_attributes)
             self.__setattr__(k,v)
-        for allowed in self._allowed_attributes:
-            if allowed not in kwargs:
-                self.__setattr__(allowed, None)
+        if missing:
+            for allowed in self._allowed_attributes:
+                if allowed not in kwargs:
+                    self.__setattr__(allowed, None)
 
     def __getattribute__(self, name):
         """
