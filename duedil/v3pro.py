@@ -23,11 +23,12 @@ import json
 try:
     # For Python 3.0 and later
     from urllib.request import urlopen
-    from urllib.parse import urlencode
+    from urllib.parse import urlencode, urlsplit
 except ImportError:
     # Fall back to Python 2's urllib2
     from urllib2 import urlopen
     from urllib import urlencode
+    from urlparse import urlsplit
 
 try:
     long
@@ -413,7 +414,63 @@ DIRECTOR_RANGE_FILTERS = [
 ]
 
 
-class Company(object):
+def locale_from_url(url):
+    path = urlsplit(url).path.split('/')
+    return [a for a in path if a in ['uk', 'roi']][0]
+
+
+class _EndPoint(object):
+
+    def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
+        self.api_key = api_key
+        self.id = id
+        assert(locale in ['uk', 'roi'])
+        self.locale = locale
+        self.sandbox = sandbox
+        self._set_attributes(missing=False, **kwargs)
+
+    def _set_attributes(self, missing, **kwargs):
+        for k, v in kwargs.items():
+            if k not in self._allowed_attributes:
+                print ("'%s'," % k)
+            # assert(k in self._allowed_attributes)
+            self.__setattr__(k, v)
+        if missing:
+            for allowed in self._allowed_attributes:
+                if allowed not in kwargs:
+                    self.__setattr__(allowed, None)
+
+    def __getattribute__(self, name):
+        """
+        lazily return attributes, only contact duedil if necessary
+        """
+        try:
+            return super(_EndPoint, self).__getattribute__(name)
+        except AttributeError:
+            if name in self._allowed_attributes:
+                self.get()
+                return super(_EndPoint, self).__getattribute__(name)
+            else:
+                raise
+
+    def get(self):
+        """
+        get results from duedil
+        """
+        data = {'api_key': self.api_key, 'nullValue': None}
+        req = urlopen('%s?%s'
+                      % (self.url, urlencode(data)))
+        result = json.loads(req.read().decode('utf-8'))
+        assert(result['response'].pop('id') == self.id)
+        self._set_attributes(missing=True, **result['response'])
+        return result
+
+    @property
+    def url(self):
+        return self._url
+
+
+class Company(_EndPoint):
 
     _allowed_attributes = [
         # this is filled by __init__ and must match this value 'id',
@@ -643,57 +700,38 @@ class Company(object):
         'turnover_delta_percentage',
 
     ]
+    _directors = None
 
     def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
-        self.api_key = api_key
-        self.id = id
-        assert(locale in ['uk', 'roi'])
-        self.locale = locale
-        self.sandbox = sandbox
+        super(Company, self).__init__(api_key, id, locale, sandbox,
+                                      **kwargs)
         if sandbox:
             self._url = 'http://duedil.io/v3/sandbox/%s/companies/%s' % (
                 locale, id)
         else:
             self._url = 'http://duedil.io/v3/%s/companies/%s' % (locale, id)
-        self._set_attributes(missing=False, **kwargs)
 
-    def _set_attributes(self, missing, **kwargs):
-        for k, v in kwargs.items():
-            if not k in self._allowed_attributes:
-                print ("'%s'," % k)
-            #assert(k in self._allowed_attributes)
-            self.__setattr__(k, v)
-        if missing:
-            for allowed in self._allowed_attributes:
-                if allowed not in kwargs:
-                    self.__setattr__(allowed, None)
-
-    def __getattribute__(self, name):
-        """
-        lazily return attributes, only contact duedil if necessary
-        """
-        try:
-            return super(Company, self).__getattribute__(name)
-        except AttributeError as e:
-            if name in self._allowed_attributes:
-                self.get()
-            return super(Company, self).__getattribute__(name)
-
-    def get(self):
-        """
-        get results from duedil
-        """
-        data = {'api_key': self.api_key, 'nullValue': None}
-        req = urlopen('%s?%s'
-                      % (self.url, urlencode(data)))
+    def _get(self, endpoint):
+        data = {'api_key': self.api_key}
+        req = urlopen('%s/%s?%s'
+                      % (self.url, endpoint, urlencode(data)))
         result = json.loads(req.read().decode('utf-8'))
-        assert(result['response'].pop('id') == self.id)
-        self._set_attributes(missing=True, **result['response'])
         return result
 
     @property
-    def url(self):
-        return self._url
+    def directors(self):
+        if self._directors:
+            return self._directors
+        else:
+            results = self._get('directors')
+            director_list = []
+            for r in results['response']['data']:
+                director_list.append(
+                    Director(self.api_key, locale=self.locale,
+                             sandbox=self.sandbox, **r)
+                )
+            self._directors = director_list
+        return self._directors
 
     @property
     def registered_address(self):
@@ -711,11 +749,51 @@ class Company(object):
         documents
         subsidiaries
         parent
-        directors
+
         directorships
         mortgages
         service-addresses
         '''
+
+
+class Director(_EndPoint):
+
+    _allowed_attributes = [
+        'open_directorships_count',
+        'retired_secretary_directorships_count',
+        'retired_directorships_count',
+        'open_trading_director_directorships_count',
+        'forename',
+        'surname',
+        'middle_name',
+        'open_secretary_directorships_count',
+        'title',
+        'last_update',
+        'date_of_birth',
+        'postal_title',
+        'secretary_directorships_count',
+        'director_directorships_count',
+        'director_url',
+        'nationality',
+        'closed_secretary_directorships_count',
+        'closed_director_directorships_count',
+        'closed_directorships_count',
+        'nation_code',
+        'open_director_directorships_count',
+        'open_trading_directorships_count',
+        'companies_url',
+        'open_trading_secretary_directorships_count',
+        'directorships_url',
+    ]
+
+    def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
+        super(Director, self).__init__(api_key, id, locale, sandbox,
+                                       **kwargs)
+        if sandbox:
+            self._url = 'http://duedil.io/v3/sandbox/%s/directors/%s' % (
+                locale, id)
+        else:
+            self._url = 'http://duedil.io/v3/%s/directors/%s' % (locale, id)
 
 
 class Client(object):
@@ -735,27 +813,14 @@ class Client(object):
     def url(self):
         return self._url
 
-    def search_company(self, order_by=None, limit=None, offset=None, **kwargs):
-        '''
-        Conduct advanced searches across all companies registered in UK & Ireland.
-        Apply any combination of 44 different filters
-
-        The parameter filters supports two different types of queries:
-            * the “range” type (ie, a numeric range) and
-            * the “terms” type (for example, an individual company name).
-
-        For the range filter, you have to pass an array;
-        for the terms filter, you just pass a string.
-
-        The range type is used when you want to limit the results to a particular range of results.
-
-        You can order the results based on the ranges using the parameter orderBy.
-        '''
+    def _build_search_string(self, term_filters, range_filters,
+                             order_by=None, limit=None, offset=None,
+                             **kwargs):
         data = {'api_key': self.api_key}
         assert(kwargs)
         for arg in kwargs:
-            assert(arg in COMPANY_TERM_FILTERS + COMPANY_RANGE_FILTERS)
-            if arg in COMPANY_TERM_FILTERS:
+            assert(arg in term_filters + range_filters)
+            if arg in term_filters:
                 # this must be  a string
                 assert(isinstance(kwargs[arg], basestring))
             elif arg in COMPANY_RANGE_FILTERS:
@@ -769,7 +834,7 @@ class Client(object):
             assert(isinstance(order_by, dict))
             assert('field' in order_by)
             assert(
-                order_by['field'] in COMPANY_TERM_FILTERS + COMPANY_RANGE_FILTERS)
+                order_by['field'] in term_filters + range_filters)
             if order_by.get('direction'):
                 assert(order_by['direction'] in ['asc', 'desc'])
             data['orderBy'] = json.dumps(order_by)
@@ -779,6 +844,31 @@ class Client(object):
         if offset:
             assert(isinstance(offset, int))
             data['offset'] = offset
+        return data
+
+    def search_company(self, order_by=None, limit=None, offset=None, **kwargs):
+        '''
+        Conduct advanced searches across all companies registered in
+        UK & Ireland.
+        Apply any combination of 44 different filters
+
+        The parameter filters supports two different types of queries:
+            * the “range” type (ie, a numeric range) and
+            * the “terms” type (for example, an individual company name).
+
+        For the range filter, you have to pass an array;
+        for the terms filter, you just pass a string.
+
+        The range type is used when you want to limit the results to a
+        particular range of results.
+
+        You can order the results based on the ranges using the
+        parameter orderBy.
+        '''
+        data = self._build_search_string(COMPANY_TERM_FILTERS,
+                                         COMPANY_RANGE_FILTERS,
+                                         order_by=order_by, limit=limit,
+                                         offset=offset, **kwargs)
         req = urlopen('%s/companies?%s'
                       % (self.url, urlencode(data)))
         results = json.loads(req.read().decode('utf-8'))
@@ -790,7 +880,8 @@ class Client(object):
             )
         return companies, results
 
-    def search_director(self, **kwargs):
+    def search_director(self, order_by=None, limit=None, offset=None,
+                        **kwargs):
         '''
         This “Director search endpoint” is similar to the
         “Company search endpoint”, though with some different ranges and
@@ -801,3 +892,17 @@ class Client(object):
 
         NB: The location filter is not available for director search.
         '''
+        data = self._build_search_string(DIRECTOR_TERM_FILTERS,
+                                         DIRECTOR_RANGE_FILTERS,
+                                         order_by=order_by, limit=limit,
+                                         offset=offset, **kwargs)
+        print ('%s/directors?%s' % (self.url, urlencode(data)))
+        req = urlopen('%s/directors?%s'
+                      % (self.url, urlencode(data)))
+        results = json.loads(req.read().decode('utf-8'))
+        directors = []
+        for r in results['response']['data']:
+            directors.append(
+                Director(self.api_key, sandbox=self.sandbox, **r)
+            )
+        return directors, results

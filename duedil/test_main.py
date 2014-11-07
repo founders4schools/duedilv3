@@ -18,8 +18,7 @@
 
 import unittest
 
-from .v3pro import Client, Company  # , Director
-from .v3pro import COMPANY_TERM_FILTERS, COMPANY_RANGE_FILTERS
+from .v3pro import Client, Company, Director
 
 try:
     from .secrets import PRO_API_KEY as API_KEY
@@ -54,7 +53,10 @@ class SearchCompaniesTestCase(unittest.TestCase):
             self.client.search_company()
         # search terms are strings
         with self.assertRaises(AssertionError):
-            self.client.search_company(bla=2)
+            self.client.search_company(location=2)
+        # search terms must be a valid filter
+        with self.assertRaises(AssertionError):
+            self.client.search_company(bla='xx')
         # search ranges have a upper and lower
         # numerical value
         with self.assertRaises(AssertionError):
@@ -66,24 +68,27 @@ class SearchCompaniesTestCase(unittest.TestCase):
         with self.assertRaises(AssertionError):
             self.client.search_company(employee_count=[2, '100'])
         # and this one must pass:
-        self.client.search_company(name='ex')
+        self.client.search_company(name='ex', employee_count=[0, 100])
 
     def test_order_by(self):
         with self.assertRaises(AssertionError):
             self.client.search_company(name='ex', order_by='None')
         # hmm does not seem to work on sandbox
-        # self.client.search_company(order_by={'field': 'turnover', 'direction':'desc'},
+        # self.client.search_company(order_by=
+        #        {'field': 'turnover', 'direction':'desc'},
         #    name='ex')
 
     def test_limit(self):
         with self.assertRaises(AssertionError):
             self.client.search_company(name='ex', limit='0')
-        self.client.search_company(name='ex', limit=1)
+        companies, raw = self.client.search_company(name='ex', limit=1)
+        self.assertEqual(len(companies), 1)
 
     def test_offset(self):
         with self.assertRaises(AssertionError):
             self.client.search_company(name='ex', offset='0')
-        self.client.search_company(name='ex', offset=0)
+        companies, raw = self.client.search_company(name='ex', offset=50000)
+        self.assertEqual(len(companies), 0)
 
     def test_results(self):
         companies, raw = self.client.search_company(name='ex')
@@ -94,6 +99,36 @@ class SearchCompaniesTestCase(unittest.TestCase):
 class SearchDirectorsTestCase(unittest.TestCase):
 
     client = Client(API_KEY, SANDBOX)
+
+    def test_kwargs(self):
+        # you have to search for something
+        with self.assertRaises(AssertionError):
+            self.client.search_director()
+        # search terms are strings
+        with self.assertRaises(AssertionError):
+            self.client.search_director(gender=2)
+        # search terms must be a valid filter
+        with self.assertRaises(AssertionError):
+            self.client.search_director(bla='xx')
+        # search ranges have a upper and lower
+        # numerical value
+        with self.assertRaises(AssertionError):
+            self.client.search_director(name=1)
+        with self.assertRaises(AssertionError):
+            self.client.search_director(turnover=1)
+        with self.assertRaises(AssertionError):
+            self.client.search_director(turnover=[1, 2, 3])
+        with self.assertRaises(AssertionError):
+            self.client.search_director(turnover=[2, '100'])
+        # and this one must pass:
+        # XXX self.client.search_director(name='ex', turnover =[0,100])
+
+    def test_results(self):
+        pass
+        # XXX this currently fails with 500
+        # directors, raw = self.client.search_director(name='John')
+        # self.assertIsInstance(directors[0], Director)
+        # self.assertIsInstance(raw, dict)
 
 
 class CompanyTestCase(unittest.TestCase):
@@ -106,7 +141,7 @@ class CompanyTestCase(unittest.TestCase):
     def test_get(self):
         company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
         self.assertEqual(len(company.__dict__), 5)
-        company.get()
+        self.assertIsInstance(company.get(), dict)
         self.assertNotEqual(len(company.name), 0)
         self.assertEqual(len(company.__dict__), 130)
 
@@ -123,10 +158,38 @@ class CompanyTestCase(unittest.TestCase):
         self.assertNotEqual(len(company.name), 0)
         self.assertEqual(len(company.__dict__), 130)
 
+    def traverse_directors(self):
+        company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
+        directors = company.directors
+        for d in directors:
+            self.assertIsInstance(d, Director)
+
 
 class DirectorTestCase(unittest.TestCase):
 
-    pass
+    if SANDBOX:
+        director_id = '1c6e4767b7100e401da7100f1ae1621e2e7d3c49'
+    else:
+        director_id = '914039209'
+
+    def test_get(self):
+        director = Director(API_KEY, self.director_id, 'uk', SANDBOX)
+        self.assertEqual(len(director.__dict__), 5)
+        self.assertIsInstance(director.get(), dict)
+        self.assertNotEqual(len(director.director_url), 0)
+        self.assertEqual(len(director.__dict__), 30)
+
+    def test_init(self):
+        director = Director(API_KEY, self.director_id, 'uk', SANDBOX,
+                            surname='Kimmelman')
+        self.assertEqual(director.surname, 'Kimmelman')
+        self.assertEqual(director.locale, 'uk')
+
+    def test_lazy_load(self):
+        director = Director(API_KEY, self.director_id, 'uk', SANDBOX)
+        self.assertEqual(len(director.__dict__), 5)
+        self.assertNotEqual(len(director.surname), 0)
+        self.assertEqual(len(director.__dict__), 30)
 
 
 def test_suite():
