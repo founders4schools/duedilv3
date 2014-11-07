@@ -16,6 +16,7 @@
 #  under the License.
 #
 
+
 class Client(object):
 
     def __init__(self, api_key, sandbox=False):
@@ -24,7 +25,3 @@ class Client(object):
             self._url = 'http://api.duedil.com/international/sandbox'
         else:
             self._url = 'http://api.duedil.com/international'
-
-
-
-

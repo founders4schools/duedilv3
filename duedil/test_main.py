@@ -18,7 +18,7 @@
 
 import unittest
 
-from .v3pro import Client, Company #, Director
+from .v3pro import Client, Company  # , Director
 from .v3pro import COMPANY_TERM_FILTERS, COMPANY_RANGE_FILTERS
 
 try:
@@ -62,17 +62,17 @@ class SearchCompaniesTestCase(unittest.TestCase):
         with self.assertRaises(AssertionError):
             self.client.search_company(employee_count=1)
         with self.assertRaises(AssertionError):
-            self.client.search_company(employee_count=[1,2,3])
+            self.client.search_company(employee_count=[1, 2, 3])
         with self.assertRaises(AssertionError):
-            self.client.search_company(employee_count=[2,'100'])
+            self.client.search_company(employee_count=[2, '100'])
         # and this one must pass:
         self.client.search_company(name='ex')
 
     def test_order_by(self):
         with self.assertRaises(AssertionError):
             self.client.search_company(name='ex', order_by='None')
-        #hmm does not seem to work on sandbox
-        #self.client.search_company(order_by={'field': 'turnover', 'direction':'desc'},
+        # hmm does not seem to work on sandbox
+        # self.client.search_company(order_by={'field': 'turnover', 'direction':'desc'},
         #    name='ex')
 
     def test_limit(self):
@@ -90,10 +90,10 @@ class SearchCompaniesTestCase(unittest.TestCase):
         self.assertIsInstance(companies[0], Company)
         self.assertIsInstance(raw, dict)
 
+
 class SearchDirectorsTestCase(unittest.TestCase):
 
     client = Client(API_KEY, SANDBOX)
-
 
 
 class CompanyTestCase(unittest.TestCase):
@@ -107,10 +107,12 @@ class CompanyTestCase(unittest.TestCase):
         company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
         self.assertEqual(len(company.__dict__), 5)
         company.get()
+        self.assertNotEqual(len(company.name), 0)
         self.assertEqual(len(company.__dict__), 130)
 
     def test_init(self):
-        company = Company(API_KEY, self.company_id, 'uk', SANDBOX, name='DUEDIL LIMITED')
+        company = Company(
+            API_KEY, self.company_id, 'uk', SANDBOX, name='DUEDIL LIMITED')
         self.assertEqual(company.name, 'DUEDIL LIMITED')
         self.assertEqual(company.id, self.company_id)
         self.assertEqual(company.locale, 'uk')
@@ -118,8 +120,9 @@ class CompanyTestCase(unittest.TestCase):
     def test_lazy_load(self):
         company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
         self.assertEqual(len(company.__dict__), 5)
-        self.assertNotEqual(company.name, 0)
+        self.assertNotEqual(len(company.name), 0)
         self.assertEqual(len(company.__dict__), 130)
+
 
 class DirectorTestCase(unittest.TestCase):
 
