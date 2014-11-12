@@ -1,3 +1,6 @@
+.. image:: https://badge.waffle.io/founders4schools/duedilv3.png?label=ready&title=Ready 
+ :target: https://waffle.io/founders4schools/duedilv3
+ :alt: 'Stories in Ready'
 
 Tested with Travis
 
