@@ -158,6 +158,11 @@ class CompanyTestCase(unittest.TestCase):
         self.assertNotEqual(len(company.name), 0)
         self.assertEqual(len(company.__dict__), 130)
 
+    def test_invalid_attribute(self):
+        company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
+        with self.assertRaises(AttributeError):
+            company.no_such_attribute
+
     def test_traverse_directors(self):
         company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
         directors = company.directors
