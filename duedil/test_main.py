@@ -18,7 +18,7 @@
 
 import unittest
 
-from .v3pro import Client, Company, Director, RegisteredAddress
+from .v3pro import Client, Company, Director, RegisteredAddress, ServiceAddress
 
 try:
     from .secrets import PRO_API_KEY as API_KEY
@@ -169,6 +169,13 @@ class CompanyTestCase(unittest.TestCase):
         registered_address = company.registered_address
         self.assertIsInstance(registered_address, RegisteredAddress)
 
+    def test_service_addresses(self):
+        company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
+        service_addresses = company.service_addresses
+        for service_address in service_addresses:
+            self.assertIsInstance(service_address, ServiceAddress)
+            self.assertNotEqual(len(service_address.address1), 0)
+
 
 class DirectorTestCase(unittest.TestCase):
 
@@ -195,6 +202,13 @@ class DirectorTestCase(unittest.TestCase):
         self.assertEqual(len(director.__dict__), 5)
         self.assertNotEqual(len(director.surname), 0)
         self.assertEqual(len(director.__dict__), 30)
+
+    def test_service_addresses(self):
+        director = Director(API_KEY, self.director_id, 'uk', SANDBOX)
+        service_addresses = director.service_addresses
+        for service_address in service_addresses:
+            self.assertIsInstance(service_address, ServiceAddress)
+            self.assertNotEqual(len(service_address.address1), 0)
 
 
 def test_suite():

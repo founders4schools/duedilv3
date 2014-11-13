@@ -419,13 +419,10 @@ def locale_from_url(url):
     return [a for a in path if a in ['uk', 'roi']][0]
 
 
-class _EndPoint(object):
+class _DueDilObj(object):
 
-    def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
+    def __init__(self, api_key, sandbox=False, **kwargs):
         self.api_key = api_key
-        self.id = id
-        assert(locale in ['uk', 'roi'])
-        self.locale = locale
         self.sandbox = sandbox
         self._set_attributes(missing=False, **kwargs)
 
@@ -439,6 +436,46 @@ class _EndPoint(object):
             for allowed in self._allowed_attributes:
                 if allowed not in kwargs:
                     self.__setattr__(allowed, None)
+
+
+class ServiceAddress(_DueDilObj):
+
+    _allowed_attributes = [
+        # 'id',
+        # string
+        'last_update',
+        # dateTime Date of last update
+        'address1',
+        # string Address part 1
+        'address2',
+        # string Address part 2
+        'address3',
+        # string Address part 3
+        'address4',
+        # string Address part 4
+        'address5',
+        # string Address part 5
+        'postcode',
+        # string Postcode
+        'postal_area',
+        # string Area code
+    ]
+
+
+class _EndPoint(_DueDilObj):
+
+    def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
+        self.id = id
+        assert(locale in ['uk', 'roi'])
+        self.locale = locale
+        super(_EndPoint, self).__init__(api_key, sandbox, **kwargs)
+
+    def _get(self, endpoint):
+        data = {'api_key': self.api_key}
+        req = urlopen('%s/%s?%s'
+                      % (self.url, endpoint, urlencode(data)))
+        result = json.loads(req.read().decode('utf-8'))
+        return result
 
     def __getattribute__(self, name):
         """
@@ -472,6 +509,7 @@ class _EndPoint(object):
 
 class Director(_EndPoint):
 
+    _service_addresses = None
     _allowed_attributes = [
         'open_directorships_count',
         'retired_secretary_directorships_count',
@@ -509,12 +547,28 @@ class Director(_EndPoint):
         else:
             self._url = 'http://duedil.io/v3/%s/directors/%s' % (locale, id)
 
+    @property
+    def service_addresses(self):
+        if self._service_addresses:
+            return self._service_addresses
+        else:
+            results = self._get('service-addresses')
+            address_list = []
+            for r in results['response']['data']:
+                address_list.append(
+                    ServiceAddress(self.api_key,
+                                   sandbox=self.sandbox,
+                                   **r)
+                )
+            self._service_addresses = address_list
+        return self._service_addresses
+
 
 class RegisteredAddress(_EndPoint):
 
     _name = 'registered-address'
     _allowed_attributes = [
-        'id',
+        # 'id',
         # string The registered ID of the company
         'last_update',
         # dateTime Date of last update
@@ -559,6 +613,7 @@ class RegisteredAddress(_EndPoint):
 
 class Company(_EndPoint):
 
+    _service_addresses = None
     _allowed_attributes = [
         # this is filled by __init__ and must match this value 'id',
         # integer The registered company number (ID) of the company
@@ -799,13 +854,6 @@ class Company(_EndPoint):
         else:
             self._url = 'http://duedil.io/v3/%s/companies/%s' % (locale, id)
 
-    def _get(self, endpoint):
-        data = {'api_key': self.api_key}
-        req = urlopen('%s/%s?%s'
-                      % (self.url, endpoint, urlencode(data)))
-        result = json.loads(req.read().decode('utf-8'))
-        return result
-
     @property
     def directors(self):
         if self._directors:
@@ -833,6 +881,22 @@ class Company(_EndPoint):
                                                          sandbox=self.sandbox,
                                                          **address_data)
             return self._registered_address
+
+    @property
+    def service_addresses(self):
+        if self._service_addresses:
+            return self._service_addresses
+        else:
+            results = self._get('service-addresses')
+            address_list = []
+            for r in results['response']['data']:
+                address_list.append(
+                    ServiceAddress(self.api_key,
+                                   sandbox=self.sandbox,
+                                   **r)
+                )
+            self._service_addresses = address_list
+        return self._service_addresses
 
         '''
         previous-company-names
