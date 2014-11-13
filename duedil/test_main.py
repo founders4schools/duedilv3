@@ -158,16 +158,18 @@ class CompanyTestCase(unittest.TestCase):
         self.assertNotEqual(len(company.name), 0)
         self.assertEqual(len(company.__dict__), 130)
 
-    def traverse_directors(self):
+    def test_traverse_directors(self):
         company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
         directors = company.directors
         for d in directors:
             self.assertIsInstance(d, Director)
+        self.assertNotEqual(len(company.directors), 0)
 
     def test_registered_address(self):
         company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
         registered_address = company.registered_address
         self.assertIsInstance(registered_address, RegisteredAddress)
+        self.assertEqual(company.registered_address, registered_address)
 
     def test_service_addresses(self):
         company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
@@ -175,6 +177,7 @@ class CompanyTestCase(unittest.TestCase):
         for service_address in service_addresses:
             self.assertIsInstance(service_address, ServiceAddress)
             self.assertNotEqual(len(service_address.address1), 0)
+        self.assertNotEqual(len(company.service_addresses), 0)
 
 
 class DirectorTestCase(unittest.TestCase):
@@ -209,6 +212,15 @@ class DirectorTestCase(unittest.TestCase):
         for service_address in service_addresses:
             self.assertIsInstance(service_address, ServiceAddress)
             self.assertNotEqual(len(service_address.address1), 0)
+        self.assertNotEqual(len(director.service_addresses), 0)
+
+    def test_companies(self):
+        director = Director(API_KEY, self.director_id, 'uk', SANDBOX)
+        companies = director.companies
+        for company in companies:
+            self.assertIsInstance(company, Company)
+            self.assertNotEqual(len(company.name), 0)
+        self.assertNotEqual(len(director.companies), 0)
 
 
 def test_suite():

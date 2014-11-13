@@ -510,6 +510,7 @@ class _EndPoint(_DueDilObj):
 class Director(_EndPoint):
 
     _service_addresses = None
+    _companies = None
     _allowed_attributes = [
         'open_directorships_count',
         'retired_secretary_directorships_count',
@@ -562,6 +563,21 @@ class Director(_EndPoint):
                 )
             self._service_addresses = address_list
         return self._service_addresses
+
+    @property
+    def companies(self):
+        if self._companies:
+            return self._companies
+        else:
+            results = self._get('companies')
+            company_list = []
+            for r in results['response']['data']:
+                company_list.append(
+                    Company(self.api_key, locale=self.locale,
+                            sandbox=self.sandbox, **r)
+                )
+            self._companies = company_list
+        return self._companies
 
 
 class RegisteredAddress(_EndPoint):
