@@ -18,7 +18,7 @@
 
 import unittest
 
-from .v3pro import Client, Company, Director
+from .v3pro import Client, Company, Director, RegisteredAddress
 
 try:
     from .secrets import PRO_API_KEY as API_KEY
@@ -163,6 +163,11 @@ class CompanyTestCase(unittest.TestCase):
         directors = company.directors
         for d in directors:
             self.assertIsInstance(d, Director)
+
+    def test_registered_address(self):
+        company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
+        registered_address = company.registered_address
+        self.assertIsInstance(registered_address, RegisteredAddress)
 
 
 class DirectorTestCase(unittest.TestCase):

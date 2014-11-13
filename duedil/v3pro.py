@@ -470,6 +470,93 @@ class _EndPoint(object):
         return self._url
 
 
+class Director(_EndPoint):
+
+    _allowed_attributes = [
+        'open_directorships_count',
+        'retired_secretary_directorships_count',
+        'retired_directorships_count',
+        'open_trading_director_directorships_count',
+        'forename',
+        'surname',
+        'middle_name',
+        'open_secretary_directorships_count',
+        'title',
+        'last_update',
+        'date_of_birth',
+        'postal_title',
+        'secretary_directorships_count',
+        'director_directorships_count',
+        'director_url',
+        'nationality',
+        'closed_secretary_directorships_count',
+        'closed_director_directorships_count',
+        'closed_directorships_count',
+        'nation_code',
+        'open_director_directorships_count',
+        'open_trading_directorships_count',
+        'companies_url',
+        'open_trading_secretary_directorships_count',
+        'directorships_url',
+    ]
+
+    def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
+        super(Director, self).__init__(api_key, id, locale, sandbox,
+                                       **kwargs)
+        if sandbox:
+            self._url = 'http://duedil.io/v3/sandbox/%s/directors/%s' % (
+                locale, id)
+        else:
+            self._url = 'http://duedil.io/v3/%s/directors/%s' % (locale, id)
+
+
+class RegisteredAddress(_EndPoint):
+
+    _name = 'registered-address'
+    _allowed_attributes = [
+        'id',
+        # string The registered ID of the company
+        'last_update',
+        # dateTime Date of last update
+        'company',
+        # string Company registration number
+        'address1',
+        # string Address part 1
+        'address2',
+        # string Address part 2
+        'address3',
+        # string Address part 3
+        'address4',
+        # string Address part 4
+        'postcode',
+        # string Postcode
+        'phone',
+        # string phone number
+        'tps',
+        # string TPS
+        'website',
+        # string Website
+        'po_box',
+        # string PO box number
+        'care_of',
+        # string Care of
+        'email',
+        # string Email address
+        'area_code',
+        # string Area code
+    ]
+
+    def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
+        super(RegisteredAddress, self).__init__(api_key, id, locale, sandbox,
+                                                **kwargs)
+        if sandbox:
+            url = 'http://duedil.io/v3/sandbox/%s/companies/%s/%s'
+            self._url = url % (locale, id, self._name)
+        else:
+            url = 'http://duedil.io/v3/%s/companies/%s/%s'
+            self._url = url % (locale, id, self._name)
+
+
 class Company(_EndPoint):
 
     _allowed_attributes = [
@@ -701,6 +788,7 @@ class Company(_EndPoint):
 
     ]
     _directors = None
+    _registered_address = None
 
     def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
         super(Company, self).__init__(api_key, id, locale, sandbox,
@@ -738,7 +826,13 @@ class Company(_EndPoint):
         if self._registered_address:
             return self._registered_address
         else:
-            self._registered_address = self._get('registered-address')
+            results = self._get('registered-address')
+            address_data = results['response']
+            self._registered_address = RegisteredAddress(self.api_key,
+                                                         locale=self.locale,
+                                                         sandbox=self.sandbox,
+                                                         **address_data)
+            return self._registered_address
 
         '''
         previous-company-names
@@ -754,46 +848,6 @@ class Company(_EndPoint):
         mortgages
         service-addresses
         '''
-
-
-class Director(_EndPoint):
-
-    _allowed_attributes = [
-        'open_directorships_count',
-        'retired_secretary_directorships_count',
-        'retired_directorships_count',
-        'open_trading_director_directorships_count',
-        'forename',
-        'surname',
-        'middle_name',
-        'open_secretary_directorships_count',
-        'title',
-        'last_update',
-        'date_of_birth',
-        'postal_title',
-        'secretary_directorships_count',
-        'director_directorships_count',
-        'director_url',
-        'nationality',
-        'closed_secretary_directorships_count',
-        'closed_director_directorships_count',
-        'closed_directorships_count',
-        'nation_code',
-        'open_director_directorships_count',
-        'open_trading_directorships_count',
-        'companies_url',
-        'open_trading_secretary_directorships_count',
-        'directorships_url',
-    ]
-
-    def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
-        super(Director, self).__init__(api_key, id, locale, sandbox,
-                                       **kwargs)
-        if sandbox:
-            self._url = 'http://duedil.io/v3/sandbox/%s/directors/%s' % (
-                locale, id)
-        else:
-            self._url = 'http://duedil.io/v3/%s/directors/%s' % (locale, id)
 
 
 class Client(object):
