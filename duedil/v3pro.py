@@ -507,79 +507,6 @@ class _EndPoint(_DueDilObj):
         return self._url
 
 
-class Director(_EndPoint):
-
-    _service_addresses = None
-    _companies = None
-    _allowed_attributes = [
-        'open_directorships_count',
-        'retired_secretary_directorships_count',
-        'retired_directorships_count',
-        'open_trading_director_directorships_count',
-        'forename',
-        'surname',
-        'middle_name',
-        'open_secretary_directorships_count',
-        'title',
-        'last_update',
-        'date_of_birth',
-        'postal_title',
-        'secretary_directorships_count',
-        'director_directorships_count',
-        'director_url',
-        'nationality',
-        'closed_secretary_directorships_count',
-        'closed_director_directorships_count',
-        'closed_directorships_count',
-        'nation_code',
-        'open_director_directorships_count',
-        'open_trading_directorships_count',
-        'companies_url',
-        'open_trading_secretary_directorships_count',
-        'directorships_url',
-    ]
-
-    def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
-        super(Director, self).__init__(api_key, id, locale, sandbox,
-                                       **kwargs)
-        if sandbox:
-            self._url = 'http://duedil.io/v3/sandbox/%s/directors/%s' % (
-                locale, id)
-        else:
-            self._url = 'http://duedil.io/v3/%s/directors/%s' % (locale, id)
-
-    @property
-    def service_addresses(self):
-        if self._service_addresses:
-            return self._service_addresses
-        else:
-            results = self._get('service-addresses')
-            address_list = []
-            for r in results['response']['data']:
-                address_list.append(
-                    ServiceAddress(self.api_key,
-                                   sandbox=self.sandbox,
-                                   **r)
-                )
-            self._service_addresses = address_list
-        return self._service_addresses
-
-    @property
-    def companies(self):
-        if self._companies:
-            return self._companies
-        else:
-            results = self._get('companies')
-            company_list = []
-            for r in results['response']['data']:
-                company_list.append(
-                    Company(self.api_key, locale=self.locale,
-                            sandbox=self.sandbox, **r)
-                )
-            self._companies = company_list
-        return self._companies
-
-
 class RegisteredAddress(_EndPoint):
 
     _name = 'registered-address'
@@ -627,9 +554,187 @@ class RegisteredAddress(_EndPoint):
             self._url = url % (locale, id, self._name)
 
 
-class Company(_EndPoint):
+class DirectorShip(_EndPoint):
+
+    _name = 'directorships'
+    _allowed_attributes = [
+        'id',
+        # string Director ID
+        'last_update',
+        # dateTime Date last updated
+        'active',
+        # boolean Active (true/false)
+        'status',
+        # string Status
+        'founding',
+        # boolean Founding director (true/false)
+        'appointment_date',
+        # dateTime Date appointed
+        'function',
+        # string Function
+        'function_code',
+        # integer Function code
+        'position',
+        # string Position
+        'position_code',
+        # string Position code
+        'companies_url',
+        # string Link to companies
+        'directors_uri',
+        # string Link to director profile
+        'service_address_uri',
+        # string Link to service address
+        'address1',
+        # string Address line 1
+        'address2',
+        # string Address line 2
+        'address3',
+        # string Address line 3
+        'address4',
+        # string Address line 4
+        'address5',
+        # string Address line 5
+        'postal_area',
+        # string Postal area
+        'postcode',
+        # string Postcode
+        # undocumented:
+        'owning_company',
+        'resignation_date',
+        'secretary',
+    ]
+
+    def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
+        super(DirectorShip, self).__init__(api_key, id, locale, sandbox,
+                                           **kwargs)
+        if sandbox:
+            url = 'http://duedil.io/v3/sandbox/%s/directors/%s/%s'
+            self._url = url % (locale, id, self._name)
+        else:
+            url = 'http://duedil.io/v3/%s/directors/%s/%s'
+            self._url = url % (locale, id, self._name)
+
+
+class Director(_EndPoint):
 
     _service_addresses = None
+    _companies = None
+    _directorships = None
+
+    _allowed_attributes = [
+        # 'id',
+        # string Director ID
+        'last_update',
+        # dateTime Date last updated
+        'open_directorships_count',
+        # integer Number of open directorships
+        'open_trading_directorships_count',
+        # integer Number of open trading directorships
+        'open_trading_director_directorships_count',
+        # integer Of which a director
+        'open_trading_secretary_directorships_count',
+        # integer Of which a secretary
+        'closed_directorships_count',
+        # integer Number of closed directorships
+        'retired_directorships_count',
+        # integer Number of retired directorships
+        'director_directorships_count',
+        # integer Number of directorships (director)
+        'open_director_directorships_count',
+        # integer Number of open directorships (director)
+        'closed_director_directorships_count',
+        # integer Number of closed directorships (director)
+        'secretary_directorships_count',
+        # integer Number of secretary directorships
+        'open_secretary_directorships_count',
+        # integer Number of open secretary directorships
+        'closed_secretary_directorships_count',
+        # integer Number of closed secretary directorships
+        'retired_secretary_directorships_count',
+        # integer Number of retired decretary directorships
+        'forename',
+        # string Forename
+        'surname',
+        # string Surname
+        'date_of_birth',
+        # dateTime Date of Birth
+        'directorships_url',
+        # string Link to directorships
+        'companies_url',
+        # string Link to companies
+        'director_url',
+        # string Link to director profile
+        # undocumented:
+        'middle_name',
+        'title',
+        'postal_title',
+        'nationality',
+        'nation_code',
+    ]
+
+    def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
+        super(Director, self).__init__(api_key, id, locale, sandbox,
+                                       **kwargs)
+        if sandbox:
+            self._url = 'http://duedil.io/v3/sandbox/%s/directors/%s' % (
+                locale, id)
+        else:
+            self._url = 'http://duedil.io/v3/%s/directors/%s' % (locale, id)
+
+    @property
+    def service_addresses(self):
+        if self._service_addresses:
+            return self._service_addresses
+        else:
+            results = self._get('service-addresses')
+            address_list = []
+            for r in results['response']['data']:
+                address_list.append(
+                    ServiceAddress(self.api_key,
+                                   sandbox=self.sandbox,
+                                   **r)
+                )
+            self._service_addresses = address_list
+        return self._service_addresses
+
+    @property
+    def companies(self):
+        if self._companies:
+            return self._companies
+        else:
+            results = self._get('companies')
+            company_list = []
+            for r in results['response']['data']:
+                company_list.append(
+                    Company(self.api_key, locale=self.locale,
+                            sandbox=self.sandbox, **r)
+                )
+            self._companies = company_list
+        return self._companies
+
+    @property
+    def directorships(self):
+        if self._directorships:
+            return self._directorships
+        else:
+            results = self._get('directorships')
+            directorships_list = []
+            for r in results['response']['data']:
+                directorships_list.append(
+                    DirectorShip(self.api_key, locale=self.locale,
+                                 sandbox=self.sandbox, **r)
+                )
+            self._directorships = directorships_list
+        return self._directorships
+
+
+class Company(_EndPoint):
+
+    _name = 'company'
+    _service_addresses = None
+    _directorships = None
+    _directors = None
+    _registered_address = None
     _allowed_attributes = [
         # this is filled by __init__ and must match this value 'id',
         # integer The registered company number (ID) of the company
@@ -856,10 +961,7 @@ class Company(_EndPoint):
         'company_url',
         'turnover',
         'turnover_delta_percentage',
-
     ]
-    _directors = None
-    _registered_address = None
 
     def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
         super(Company, self).__init__(api_key, id, locale, sandbox,
@@ -914,20 +1016,33 @@ class Company(_EndPoint):
             self._service_addresses = address_list
         return self._service_addresses
 
-        '''
-        previous-company-names
-        industries
-        shareholders
-        bank-accounts
-        accounts
-        documents
-        subsidiaries
-        parent
+    @property
+    def directorships(self):
+        if self._directorships:
+            return self._directorships
+        else:
+            results = self._get('directorships')
+            directorships_list = []
+            for r in results['response']['data']:
+                directorships_list.append(
+                    DirectorShip(self.api_key, locale=self.locale,
+                                 sandbox=self.sandbox, **r)
+                )
+            self._directorships = directorships_list
+        return self._directorships
 
-        directorships
-        mortgages
-        service-addresses
-        '''
+    '''
+    previous-company-names
+    industries
+    shareholders
+    bank-accounts
+    accounts
+    documents
+    subsidiaries
+    parent
+    mortgages
+    service-addresses
+    '''
 
 
 class Client(object):
