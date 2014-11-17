@@ -135,7 +135,7 @@ class SearchDirectorsTestCase(unittest.TestCase):
 class CompanyTestCase(unittest.TestCase):
 
     if SANDBOX:
-        company_id = '325401bd2f2ea29373c533eb1587e5fcab36f13b'
+        company_id = '7c6338188254b24019a69d14e3158de02d2ce35e'
     else:
         company_id = '06999618'
 
@@ -192,6 +192,21 @@ class CompanyTestCase(unittest.TestCase):
             self.assertIsInstance(directorship, DirectorShip)
             self.assertNotEqual(len(directorship.address1), 0)
         self.assertNotEqual(len(company.directorships), 0)
+
+    def test_subsidiaries(self):
+        company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
+        subsidiaries = company.subsidiaries
+        for subsidiary in subsidiaries:
+            self.assertIsInstance(subsidiary, Company)
+            self.assertNotEqual(len(subsidiary.name), 0)
+        self.assertNotEqual(len(company.subsidiaries), 0)
+
+    def test_parent(self):
+        company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
+        parent = company.parent
+        self.assertIsInstance(parent, Company)
+        self.assertNotEqual(len(parent.name), 0)
+        self.assertNotEqual(len(company.parent.name), 0)
 
 
 class DirectorTestCase(unittest.TestCase):

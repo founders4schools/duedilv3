@@ -30,12 +30,12 @@ from .apiconst import (COMPANY_ALLOWED_ATTRIBUTES, COMPANY_RANGE_FILTERS,
 try:
     # For Python 3.0 and later
     from urllib.request import urlopen
-    from urllib.parse import urlencode, urlsplit
+    from urllib.parse import urlencode
 except ImportError:
     # Fall back to Python 2's urllib2
     from urllib2 import urlopen
     from urllib import urlencode
-    from urlparse import urlsplit
+
 
 try:
     long
@@ -50,17 +50,22 @@ except NameError:
     basestring = unicode = str
 
 
-def locale_from_url(url):
-    path = urlsplit(url).path.split('/')
-    return [a for a in path if a in ['uk', 'roi']][0]
+class _EndPoint(object):
 
-
-class _DueDilObj(object):
-
-    def __init__(self, api_key, sandbox=False, **kwargs):
+    def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
+        self.id = id
+        assert(locale in ['uk', 'roi'])
+        self.locale = locale
         self.api_key = api_key
         self.sandbox = sandbox
         self._set_attributes(missing=False, **kwargs)
+
+    def _get(self, endpoint):
+        data = {'api_key': self.api_key}
+        req = urlopen('%s/%s?%s'
+                      % (self.url, endpoint, urlencode(data)))
+        result = json.loads(req.read().decode('utf-8'))
+        return result
 
     def _set_attributes(self, missing, **kwargs):
         for k, v in kwargs.items():
@@ -72,27 +77,6 @@ class _DueDilObj(object):
             for allowed in self._allowed_attributes:
                 if allowed not in kwargs:
                     self.__setattr__(allowed, None)
-
-
-class ServiceAddress(_DueDilObj):
-
-    _allowed_attributes = SERVICE_ADDRESS_ALLOWED_ATTRIBUTES
-
-
-class _EndPoint(_DueDilObj):
-
-    def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
-        self.id = id
-        assert(locale in ['uk', 'roi'])
-        self.locale = locale
-        super(_EndPoint, self).__init__(api_key, sandbox, **kwargs)
-
-    def _get(self, endpoint):
-        data = {'api_key': self.api_key}
-        req = urlopen('%s/%s?%s'
-                      % (self.url, endpoint, urlencode(data)))
-        result = json.loads(req.read().decode('utf-8'))
-        return result
 
     def __getattribute__(self, name):
         """
@@ -122,6 +106,22 @@ class _EndPoint(_DueDilObj):
     @property
     def url(self):
         return self._url
+
+
+class ServiceAddress(_EndPoint):
+
+    _name = 'service-addresses'
+    _allowed_attributes = SERVICE_ADDRESS_ALLOWED_ATTRIBUTES
+
+    def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
+        super(ServiceAddress, self).__init__(api_key, id, locale, sandbox,
+                                             **kwargs)
+        if sandbox:
+            url = 'http://duedil.io/v3/sandbox/%s/companies/%s/%s'
+            self._url = url % (locale, id, self._name)
+        else:
+            url = 'http://duedil.io/v3/%s/companies/%s/%s'
+            self._url = url % (locale, id, self._name)
 
 
 class RegisteredAddress(_EndPoint):
@@ -184,6 +184,7 @@ class Director(_EndPoint):
             for r in results['response']['data']:
                 address_list.append(
                     ServiceAddress(self.api_key,
+                                   locale=self.locale,
                                    sandbox=self.sandbox,
                                    **r)
                 )
@@ -228,6 +229,8 @@ class Company(_EndPoint):
     _directorships = None
     _directors = None
     _registered_address = None
+    _subsidiaries = None
+    _parent = None
     _allowed_attributes = COMPANY_ALLOWED_ATTRIBUTES
 
     def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
@@ -276,7 +279,8 @@ class Company(_EndPoint):
             address_list = []
             for r in results['response']['data']:
                 address_list.append(
-                    ServiceAddress(self.api_key,
+                    ServiceAddress(self.api_key, id=self.id,
+                                   locale=self.locale,
                                    sandbox=self.sandbox,
                                    **r)
                 )
@@ -298,6 +302,32 @@ class Company(_EndPoint):
             self._directorships = directorships_list
         return self._directorships
 
+    @property
+    def subsidiaries(self):
+        if self._subsidiaries:
+            return self._subsidiaries
+        else:
+            results = self._get('subsidiaries')
+            subsidiaries_list = []
+            for r in results['response']['data']:
+                subsidiaries_list.append(
+                    Company(self.api_key, locale=self.locale,
+                            sandbox=self.sandbox, **r)
+                )
+            self._subsidiaries = subsidiaries_list
+        return self._subsidiaries
+
+    @property
+    def parent(self):
+        if self._parent:
+            return self._parent
+        else:
+            results = self._get('parent')
+            p_data = results['response']
+            self._parent = Company(self.api_key, locale=self.locale,
+                                   sandbox=self.sandbox, **p_data)
+        return self._parent
+
     '''
     previous-company-names
     industries
@@ -305,10 +335,7 @@ class Company(_EndPoint):
     bank-accounts
     accounts
     documents
-    subsidiaries
-    parent
     mortgages
-    service-addresses
     '''
 
 
