@@ -29,13 +29,13 @@ from .apiconst import (COMPANY_ALLOWED_ATTRIBUTES, COMPANY_RANGE_FILTERS,
 
 try:
     # For Python 3.0 and later
-    from urllib.request import urlopen
+    from urllib.error import HTTPError
     from urllib.parse import urlencode
+    from urllib.request import urlopen
 except ImportError:
-    # Fall back to Python 2's urllib2
-    from urllib2 import urlopen
+    # Fall back to Python 2's urllib(2)
     from urllib import urlencode
-
+    from urllib2 import urlopen, HTTPError
 
 try:
     long
@@ -231,6 +231,7 @@ class Company(_EndPoint):
     _registered_address = None
     _subsidiaries = None
     _parent = None
+    _has_parent = None
     _allowed_attributes = COMPANY_ALLOWED_ATTRIBUTES
 
     def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
@@ -304,28 +305,41 @@ class Company(_EndPoint):
 
     @property
     def subsidiaries(self):
-        if self._subsidiaries:
+        if isinstance(self._subsidiaries, (list, tuple)):
             return self._subsidiaries
         else:
-            results = self._get('subsidiaries')
             subsidiaries_list = []
-            for r in results['response']['data']:
-                subsidiaries_list.append(
-                    Company(self.api_key, locale=self.locale,
-                            sandbox=self.sandbox, **r)
-                )
+            try:
+                results = self._get('subsidiaries')
+                for r in results['response']['data']:
+                    subsidiaries_list.append(
+                        Company(self.api_key, locale=self.locale,
+                                sandbox=self.sandbox, **r)
+                    )
+            except HTTPError as e:
+                if e.code == 404:
+                    pass
+                else:
+                    raise
             self._subsidiaries = subsidiaries_list
         return self._subsidiaries
 
     @property
     def parent(self):
-        if self._parent:
+        if self._has_parent is not None:
             return self._parent
         else:
-            results = self._get('parent')
-            p_data = results['response']
-            self._parent = Company(self.api_key, locale=self.locale,
-                                   sandbox=self.sandbox, **p_data)
+            try:
+                results = self._get('parent')
+                p_data = results['response']
+                self._parent = Company(self.api_key, locale=self.locale,
+                                       sandbox=self.sandbox, **p_data)
+                self._has_parent = True
+            except HTTPError as e:
+                if e.code == 404:
+                    self._has_parent = False
+                else:
+                    raise
         return self._parent
 
     '''

@@ -204,6 +204,17 @@ class CompanyTestCase(unittest.TestCase):
             self.assertNotEqual(len(subsidiary.name), 0)
         self.assertNotEqual(len(company.subsidiaries), 0)
 
+    def test_no_subsidiaries(self):
+        if SANDBOX:
+            company = Company(API_KEY,
+                              '325401bd2f2ea29373c533eb1587e5fcab36f13b',
+                              'uk', SANDBOX)
+        else:
+            company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
+        subsidiaries = company.subsidiaries
+        self.assertEqual(subsidiaries, [])
+        self.assertEqual(len(company.subsidiaries), 0)
+
     def test_parent(self):
         if SANDBOX:
             company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
@@ -213,6 +224,17 @@ class CompanyTestCase(unittest.TestCase):
         self.assertIsInstance(parent, Company)
         self.assertNotEqual(len(parent.name), 0)
         self.assertNotEqual(len(company.parent.name), 0)
+
+    def test_no_parent(self):
+        if SANDBOX:
+            company = Company(API_KEY,
+                              '325401bd2f2ea29373c533eb1587e5fcab36f13b',
+                              'uk', SANDBOX)
+        else:
+            company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
+        parent = company.parent
+        self.assertEqual(parent, None)
+        self.assertEqual(company.parent, None)
 
 
 class DirectorTestCase(unittest.TestCase):
