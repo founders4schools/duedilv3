@@ -114,7 +114,7 @@ class _EndPoint(object):
             result = json.loads(req.read().decode('utf-8'))
             if self._cache is not None:
                 self._cache.set_url(self.url, result)
-        assert(result['response'].pop('id') == self.id)
+        assert(result['response'].get('id') == self.id)
         self._set_attributes(missing=True, **result['response'])
         return result
 
