@@ -15,3 +15,18 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 #
+#
+
+
+class Cache(object):
+
+    _raw_dict = {}
+
+    def __init__(self, raw_dict={}):
+        self._raw_dict = raw_dict
+
+    def get_url(self, url):
+        return self._raw_dict.get(url, None)
+
+    def set_url(self, url, data):
+        self._raw_dict[url] = data

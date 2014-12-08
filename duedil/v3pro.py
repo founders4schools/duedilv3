@@ -52,19 +52,28 @@ except NameError:
 
 class _EndPoint(object):
 
-    def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
+    def __init__(self, api_key, id, locale, sandbox=False, cache=None,
+                 **kwargs):
         self.id = id
         assert(locale in ['uk', 'roi'])
         self.locale = locale
         self.api_key = api_key
         self.sandbox = sandbox
+        self._cache = cache
         self._set_attributes(missing=False, **kwargs)
 
     def _get(self, endpoint):
-        data = {'api_key': self.api_key}
-        req = urlopen('%s/%s?%s'
-                      % (self.url, endpoint, urlencode(data)))
-        result = json.loads(req.read().decode('utf-8'))
+        url = '%s/%s' % (self.url, endpoint)
+        if self._cache is not None:
+            result = self._cache.get_url(url)
+        else:
+            result = None
+        if result is None:
+            data = {'api_key': self.api_key}
+            req = urlopen('%s?%s' % (url, urlencode(data)))
+            result = json.loads(req.read().decode('utf-8'))
+            if self._cache is not None:
+                self._cache.set_url(url, result)
         return result
 
     def _set_attributes(self, missing, **kwargs):
@@ -95,10 +104,16 @@ class _EndPoint(object):
         """
         get results from duedil
         """
-        data = {'api_key': self.api_key, 'nullValue': None}
-        req = urlopen('%s?%s'
-                      % (self.url, urlencode(data)))
-        result = json.loads(req.read().decode('utf-8'))
+        if self._cache is not None:
+            result = self._cache.get_url(self.url)
+        else:
+            result = None
+        if result is None:
+            data = {'api_key': self.api_key, 'nullValue': None}
+            req = urlopen('%s?%s' % (self.url, urlencode(data)))
+            result = json.loads(req.read().decode('utf-8'))
+            if self._cache is not None:
+                self._cache.set_url(self.url, result)
         assert(result['response'].pop('id') == self.id)
         self._set_attributes(missing=True, **result['response'])
         return result
@@ -113,9 +128,10 @@ class ServiceAddress(_EndPoint):
     _name = 'service-addresses'
     _allowed_attributes = SERVICE_ADDRESS_ALLOWED_ATTRIBUTES
 
-    def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
+    def __init__(self, api_key, id, locale, sandbox=False, cache=None,
+                 **kwargs):
         super(ServiceAddress, self).__init__(api_key, id, locale, sandbox,
-                                             **kwargs)
+                                             cache, **kwargs)
         if sandbox:
             url = 'http://duedil.io/v3/sandbox/%s/companies/%s/%s'
             self._url = url % (locale, id, self._name)
@@ -129,9 +145,10 @@ class RegisteredAddress(_EndPoint):
     _name = 'registered-address'
     _allowed_attributes = REGISTERED_ADDRESS_ALLOWED_ATTRIBUTES
 
-    def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
+    def __init__(self, api_key, id, locale, sandbox=False, cache=None,
+                 **kwargs):
         super(RegisteredAddress, self).__init__(api_key, id, locale, sandbox,
-                                                **kwargs)
+                                                cache, **kwargs)
         if sandbox:
             url = 'http://duedil.io/v3/sandbox/%s/companies/%s/%s'
             self._url = url % (locale, id, self._name)
@@ -145,9 +162,10 @@ class DirectorShip(_EndPoint):
     _name = 'directorships'
     _allowed_attributes = DIRECTORSHIPS_ALLOWED_ATTRIBUTES
 
-    def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
+    def __init__(self, api_key, id, locale, sandbox=False, cache=None,
+                 **kwargs):
         super(DirectorShip, self).__init__(api_key, id, locale, sandbox,
-                                           **kwargs)
+                                           cache, **kwargs)
         if sandbox:
             url = 'http://duedil.io/v3/sandbox/%s/directors/%s/%s'
             self._url = url % (locale, id, self._name)
@@ -165,9 +183,10 @@ class Director(_EndPoint):
 
     _allowed_attributes = DIRECTOR_ALLOWED_ATTRIBUTES
 
-    def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
+    def __init__(self, api_key, id, locale, sandbox=False, cache=None,
+                 **kwargs):
         super(Director, self).__init__(api_key, id, locale, sandbox,
-                                       **kwargs)
+                                       cache, **kwargs)
         if sandbox:
             self._url = 'http://duedil.io/v3/sandbox/%s/directors/%s' % (
                 locale, id)
@@ -234,9 +253,10 @@ class Company(_EndPoint):
     _has_parent = None
     _allowed_attributes = COMPANY_ALLOWED_ATTRIBUTES
 
-    def __init__(self, api_key, id, locale, sandbox=False, **kwargs):
+    def __init__(self, api_key, id, locale, sandbox=False, cache=None,
+                 **kwargs):
         super(Company, self).__init__(api_key, id, locale, sandbox,
-                                      **kwargs)
+                                      cache, **kwargs)
         if sandbox:
             self._url = 'http://duedil.io/v3/sandbox/%s/companies/%s' % (
                 locale, id)

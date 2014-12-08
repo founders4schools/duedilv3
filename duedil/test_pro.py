@@ -125,11 +125,10 @@ class SearchDirectorsTestCase(unittest.TestCase):
         # XXX self.client.search_director(name='ex', turnover =[0,100])
 
     def test_results(self):
-        pass
-        # XXX this currently fails with 500
-        # directors, raw = self.client.search_director(name='John')
-        # self.assertIsInstance(directors[0], Director)
-        # self.assertIsInstance(raw, dict)
+        if not SANDBOX:
+            directors, raw = self.client.search_director(name='John')
+            self.assertIsInstance(directors[0], Director)
+            self.assertIsInstance(raw, dict)
 
 
 class CompanyTestCase(unittest.TestCase):
@@ -141,10 +140,10 @@ class CompanyTestCase(unittest.TestCase):
 
     def test_get(self):
         company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
-        self.assertEqual(len(company.__dict__), 5)
+        self.assertEqual(len(company.__dict__), 6)
         self.assertIsInstance(company.get(), dict)
         self.assertNotEqual(len(company.name), 0)
-        self.assertEqual(len(company.__dict__), 130)
+        self.assertEqual(len(company.__dict__), 131)
 
     def test_init(self):
         company = Company(
@@ -155,9 +154,9 @@ class CompanyTestCase(unittest.TestCase):
 
     def test_lazy_load(self):
         company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
-        self.assertEqual(len(company.__dict__), 5)
+        self.assertEqual(len(company.__dict__), 6)
         self.assertNotEqual(len(company.name), 0)
-        self.assertEqual(len(company.__dict__), 130)
+        self.assertEqual(len(company.__dict__), 131)
 
     def test_invalid_attribute(self):
         company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
@@ -246,10 +245,10 @@ class DirectorTestCase(unittest.TestCase):
 
     def test_get(self):
         director = Director(API_KEY, self.director_id, 'uk', SANDBOX)
-        self.assertEqual(len(director.__dict__), 5)
+        self.assertEqual(len(director.__dict__), 6)
         self.assertIsInstance(director.get(), dict)
         self.assertNotEqual(len(director.director_url), 0)
-        self.assertEqual(len(director.__dict__), 30)
+        self.assertEqual(len(director.__dict__), 31)
 
     def test_init(self):
         director = Director(API_KEY, self.director_id, 'uk', SANDBOX,
@@ -259,9 +258,9 @@ class DirectorTestCase(unittest.TestCase):
 
     def test_lazy_load(self):
         director = Director(API_KEY, self.director_id, 'uk', SANDBOX)
-        self.assertEqual(len(director.__dict__), 5)
+        self.assertEqual(len(director.__dict__), 6)
         self.assertNotEqual(len(director.surname), 0)
-        self.assertEqual(len(director.__dict__), 30)
+        self.assertEqual(len(director.__dict__), 31)
 
     def test_service_addresses(self):
         director = Director(API_KEY, self.director_id, 'uk', SANDBOX)
