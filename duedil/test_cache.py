@@ -19,7 +19,6 @@
 import unittest
 
 from .cache import Cache
-
 from .v3pro import Company, Director
 
 try:
@@ -81,12 +80,23 @@ class DirectorTestCase(unittest.TestCase):
         rid2 = result['request_id']
         self.assertNotEqual(rid, rid2)
 
-    def test_service_addresses(self):
+    def test_under_get_cached(self):
         cache = Cache()
         director = Director(API_KEY, self.director_id, 'uk', SANDBOX, cache)
-        director.service_addresses
-        # second call to get coverage
-        director.service_addresses
+        result = director._get('service-addresses')
+        rid = result['request_id']
+        result = director._get('service-addresses')
+        rid2 = result['request_id']
+        self.assertEqual(rid, rid2)
+
+    def test_under_get_uncached(self):
+        cache = None
+        director = Director(API_KEY, self.director_id, 'uk', SANDBOX, cache)
+        result = director._get('service-addresses')
+        rid = result['request_id']
+        result = director._get('service-addresses')
+        rid2 = result['request_id']
+        self.assertNotEqual(rid, rid2)
 
 
 def test_suite():
