@@ -21,10 +21,10 @@ import unittest
 from .cache import Cache
 from .v3pro import Company, Director
 
-try:
+try:  # pragma: no cover
     from .secrets import PRO_API_KEY as API_KEY
     SANDBOX = False
-except ImportError:
+except ImportError:  # pragma: no cover
     API_KEY = 'x425dum7jp2jxuz7e3ktaqmx'
     SANDBOX = True
 

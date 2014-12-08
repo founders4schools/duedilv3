@@ -27,25 +27,25 @@ from .apiconst import (COMPANY_ALLOWED_ATTRIBUTES, COMPANY_RANGE_FILTERS,
                        REGISTERED_ADDRESS_ALLOWED_ATTRIBUTES,
                        SERVICE_ADDRESS_ALLOWED_ATTRIBUTES)
 
-try:
+try:  # pragma: no cover
     # For Python 3.0 and later
     from urllib.error import HTTPError
     from urllib.parse import urlencode
     from urllib.request import urlopen
-except ImportError:
+except ImportError:  # pragma: no cover
     # Fall back to Python 2's urllib(2)
     from urllib import urlencode
     from urllib2 import urlopen, HTTPError
 
-try:
+try:  # pragma: no cover
     long
-except NameError:
+except NameError:  # pragma: no cover
     # Python 3
     long = int
 
-try:
+try:  # pragma: no cover
     unicode
-except NameError:
+except NameError:  # pragma: no cover
     # Python 3
     basestring = unicode = str
 
@@ -135,7 +135,7 @@ class ServiceAddress(_EndPoint):
         if sandbox:
             url = 'http://duedil.io/v3/sandbox/%s/companies/%s/%s'
             self._url = url % (locale, id, self._name)
-        else:
+        else:  # pragma: no cover
             url = 'http://duedil.io/v3/%s/companies/%s/%s'
             self._url = url % (locale, id, self._name)
 
@@ -152,7 +152,7 @@ class RegisteredAddress(_EndPoint):
         if sandbox:
             url = 'http://duedil.io/v3/sandbox/%s/companies/%s/%s'
             self._url = url % (locale, id, self._name)
-        else:
+        else:  # pragma: no cover
             url = 'http://duedil.io/v3/%s/companies/%s/%s'
             self._url = url % (locale, id, self._name)
 
@@ -169,7 +169,7 @@ class DirectorShip(_EndPoint):
         if sandbox:
             url = 'http://duedil.io/v3/sandbox/%s/directors/%s/%s'
             self._url = url % (locale, id, self._name)
-        else:
+        else:  # pragma: no cover
             url = 'http://duedil.io/v3/%s/directors/%s/%s'
             self._url = url % (locale, id, self._name)
 
@@ -190,7 +190,7 @@ class Director(_EndPoint):
         if sandbox:
             self._url = 'http://duedil.io/v3/sandbox/%s/directors/%s' % (
                 locale, id)
-        else:
+        else:  # pragma: no cover
             self._url = 'http://duedil.io/v3/%s/directors/%s' % (locale, id)
 
     @property
@@ -260,7 +260,7 @@ class Company(_EndPoint):
         if sandbox:
             self._url = 'http://duedil.io/v3/sandbox/%s/companies/%s' % (
                 locale, id)
-        else:
+        else:  # pragma: no cover
             self._url = 'http://duedil.io/v3/%s/companies/%s' % (locale, id)
 
     @property
