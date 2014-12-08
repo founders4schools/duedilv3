@@ -125,7 +125,7 @@ class SearchDirectorsTestCase(unittest.TestCase):
         # XXX self.client.search_director(name='ex', turnover =[0,100])
 
     def test_results(self):
-        if not SANDBOX:
+        if not SANDBOX:  # pragma: no cover
             directors, raw = self.client.search_director(name='John')
             self.assertIsInstance(directors[0], Director)
             self.assertIsInstance(raw, dict)
@@ -135,7 +135,7 @@ class CompanyTestCase(unittest.TestCase):
 
     if SANDBOX:
         company_id = '7c6338188254b24019a69d14e3158de02d2ce35e'
-    else:
+    else:  # pragma: no cover
         company_id = '06999618'
 
     def test_get(self):
@@ -195,7 +195,7 @@ class CompanyTestCase(unittest.TestCase):
     def test_subsidiaries(self):
         if SANDBOX:
             company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
-        else:
+        else:  # pragma: no cover
             company = Company(API_KEY, '06051516', 'uk', SANDBOX)
         subsidiaries = company.subsidiaries
         for subsidiary in subsidiaries:
@@ -208,7 +208,7 @@ class CompanyTestCase(unittest.TestCase):
             company = Company(API_KEY,
                               '325401bd2f2ea29373c533eb1587e5fcab36f13b',
                               'uk', SANDBOX)
-        else:
+        else:  # pragma: no cover
             company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
         subsidiaries = company.subsidiaries
         self.assertEqual(subsidiaries, [])
@@ -217,7 +217,7 @@ class CompanyTestCase(unittest.TestCase):
     def test_parent(self):
         if SANDBOX:
             company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
-        else:
+        else:  # pragma: no cover
             company = Company(API_KEY, '03998387', 'uk', SANDBOX)
         parent = company.parent
         self.assertIsInstance(parent, Company)
@@ -229,7 +229,7 @@ class CompanyTestCase(unittest.TestCase):
             company = Company(API_KEY,
                               '325401bd2f2ea29373c533eb1587e5fcab36f13b',
                               'uk', SANDBOX)
-        else:
+        else:  # pragma: no cover
             company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
         parent = company.parent
         self.assertEqual(parent, None)
@@ -240,7 +240,7 @@ class DirectorTestCase(unittest.TestCase):
 
     if SANDBOX:
         director_id = '1c6e4767b7100e401da7100f1ae1621e2e7d3c49'
-    else:
+    else:  # pragma: no cover
         director_id = '914039209'
 
     def test_get(self):

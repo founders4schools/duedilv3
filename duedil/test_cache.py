@@ -33,7 +33,7 @@ class CompanyTestCase(unittest.TestCase):
 
     if SANDBOX:
         company_id = '7c6338188254b24019a69d14e3158de02d2ce35e'
-    else:
+    else:  # pragma: no cover
         company_id = '06999618'
 
     def test_get_cached(self):
@@ -59,7 +59,7 @@ class DirectorTestCase(unittest.TestCase):
 
     if SANDBOX:
         director_id = '1c6e4767b7100e401da7100f1ae1621e2e7d3c49'
-    else:
+    else:  # pragma: no cover
         director_id = '914039209'
 
     def test_get_cached(self):
