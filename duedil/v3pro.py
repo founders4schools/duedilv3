@@ -378,13 +378,14 @@ class Client(object):
     last_company_response = {}
     last_director_response = {}
 
-    def __init__(self, api_key, sandbox=False):
+    def __init__(self, api_key, sandbox=False, cache=None):
         self.api_key = api_key
         self.sandbox = sandbox
         if sandbox:
             self._url = 'http://duedil.io/v3/sandbox'
         else:
             self._url = 'http://duedil.io/v3'
+        self.cache = cache
 
     @property
     def url(self):
@@ -453,7 +454,8 @@ class Client(object):
         companies = []
         for r in results['response']['data']:
             companies.append(
-                Company(self.api_key, sandbox=self.sandbox, **r)
+                Company(
+                    self.api_key, sandbox=self.sandbox, cache=self.cache, **r)
             )
         return companies, results
 
@@ -473,13 +475,13 @@ class Client(object):
                                          DIRECTOR_RANGE_FILTERS,
                                          order_by=order_by, limit=limit,
                                          offset=offset, **kwargs)
-        print ('%s/directors?%s' % (self.url, urlencode(data)))
         req = urlopen('%s/directors?%s'
                       % (self.url, urlencode(data)))
         results = json.loads(req.read().decode('utf-8'))
         directors = []
         for r in results['response']['data']:
             directors.append(
-                Director(self.api_key, sandbox=self.sandbox, **r)
+                Director(
+                    self.api_key, sandbox=self.sandbox, cache=self.cache, **r)
             )
         return directors, results

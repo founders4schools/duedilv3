@@ -1,0 +1,6 @@
+Field Name,Type,Description
+company_number,string,The company number
+locale,string,"Either ""United Kingdom"" or ""Republic of Ireland"""
+name,string,The company name
+name_formatted,string,a more readable version of the company name
+link,string,"url to retrieve the company profile, just add your API key and request."

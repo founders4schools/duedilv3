@@ -1,0 +1,25 @@
+Field Name,Type,Description
+duedil_url,string,the url of the full company profile on duedil.com
+company_number,string,the company number
+name_formated,string,a more readable version of the company name
+registered_address,obj,Holds address information about the company
+registered_address.string,string,"Full registered address of the company, formatted as a string."
+registered_address.postcode,string,The postcode (if available) of the company
+registered_address.full_address,array,array containing the individual address lines
+category,string,"The category of company eg ""Public Limited Company"""
+status,string,"a string describing the status of company eg ""In Liquidation"""
+locale,string,"Either ""United Kingdom"" or ""Republic of Ireland"""
+previous_names,array,a collection containing one or more previous name objects
+previous_names[].name,string,the raw previous name of the company
+previous_names[].name_formatted,string,a more readable version of the previous name
+previous_names[].ended_date,string,when the company ceased using this name [YYYY-MM-DD]
+sic_codes,array,a collection containing one or more SIC code objects
+sic_codes[].code,string,The SIC code
+sic_codes[].description,string,Description of the SIC code
+sic_codes[].type,string,"Either ""primary"" or ""secondary"""
+incorporation_date,string,when the company was incorporated. [YYYY-MM-DD]
+accounts,obj,Information about the most recent accounts
+accounts.accounts_date,string,Date of latest accounts. [YYYY-MM-DD]
+accounts.type,string,"The type of accounts filed. eg ""Full"""
+returns,obj,information about the company's returns
+returns.last_returns_date,string,Date of the last returns. [YYYY-MM-DD]
