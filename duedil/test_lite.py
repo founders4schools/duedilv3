@@ -17,6 +17,7 @@
 #
 
 import unittest
+import time
 
 from .cache import Cache
 from .v3lite import Client, Company
@@ -29,6 +30,7 @@ class SearchCompaniesTestCase(unittest.TestCase):
     client = Client(API_KEY)
 
     def test_search(self):
+        time.sleep(2)
         companies, raw = self.client.search('DueDil')
         self.assertIsInstance(raw, dict)
         for company in companies:
@@ -48,17 +50,19 @@ class CompanyTestCase(unittest.TestCase):
         self.assertEqual(company.locale, 'United Kingdom')
 
     def test_lazy_load(self):
-        company = Company(API_KEY, company_number='06999618')
+        time.sleep(2)
+        company = Company(API_KEY, company_number='03122984')
         self.assertEqual(len(company.__dict__), 4)
         self.assertNotEqual(len(company.category), 0)
         self.assertEqual(len(company.__dict__), 17)
-        self.assertEqual(company.name, 'DUEDIL LIMITED')
+        self.assertEqual(company.name, 'DUE DILIGENCE LIMITED')
         postcode = company.registered_address['postcode']
-        self.assertEqual(postcode, 'WC1R 4AG')
+        self.assertEqual(postcode, 'EX1 2ND')
 
     def test_cache(self):
+        time.sleep(2)
         cache = Cache()
-        company = Company(API_KEY, company_number='06999618', cache=cache)
+        company = Company(API_KEY, company_number='03008575', cache=cache)
         self.assertIsNone(cache.get_url(company.url))
         self.assertIsInstance(company.get(), dict)
         self.assertIsInstance(cache.get_url(company.url), dict)
