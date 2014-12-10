@@ -29,7 +29,14 @@ setup(name='duedil',
           open(os.path.join("docs", "HISTORY.txt")).read() + "\n" +
           open(os.path.join("docs", "TODO.txt")).read()
       ),
-      classifiers=[],
+      classifiers=['Intended Audience :: Developers',
+                   'License :: OSI Approved :: Apache Software License',
+                   'Programming Language :: Python :: 3',
+                   'Programming Language :: Python :: 2',
+                   'Programming Language :: Python :: 2.7',
+                   'Programming Language :: Python :: 3.3',
+                   'Programming Language :: Python :: 3.4',
+                   'Development Status :: 3 - Alpha', ],
       # Get strings from
       # http://pypi.python.org/pypi?%3Aaction=list_classifiers
       keywords='duedil, api',
