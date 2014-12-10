@@ -50,7 +50,7 @@ class CompanyTestCase(unittest.TestCase):
         company = Company(API_KEY, company_number='06999618')
         self.assertEqual(len(company.__dict__), 4)
         self.assertNotEqual(len(company.category), 0)
-        self.assertEqual(len(company.__dict__), 29)
+        self.assertNotEqual(len(company.__dict__), 4)
         self.assertEqual(company.name, 'DUEDIL LIMITED')
         postcode = company.registered_address['postcode']
         self.assertEqual(postcode, 'WC1R 4AG')
