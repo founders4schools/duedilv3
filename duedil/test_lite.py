@@ -16,8 +16,8 @@
 #  under the License.
 #
 
-import unittest
 import time
+import unittest
 
 from .cache import Cache
 from .v3lite import Client, Company
@@ -30,7 +30,7 @@ class SearchCompaniesTestCase(unittest.TestCase):
     client = Client(API_KEY)
 
     def test_search(self):
-        time.sleep(2)
+        time.sleep(1)
         companies, raw = self.client.search('DueDil')
         self.assertIsInstance(raw, dict)
         for company in companies:
@@ -50,7 +50,7 @@ class CompanyTestCase(unittest.TestCase):
         self.assertEqual(company.locale, 'United Kingdom')
 
     def test_lazy_load(self):
-        time.sleep(2)
+        time.sleep(1)
         company = Company(API_KEY, company_number='03122984')
         self.assertEqual(len(company.__dict__), 4)
         self.assertNotEqual(len(company.category), 0)
@@ -60,12 +60,13 @@ class CompanyTestCase(unittest.TestCase):
         self.assertEqual(postcode, 'EX1 2ND')
 
     def test_cache(self):
-        time.sleep(2)
+        time.sleep(1)
         cache = Cache()
         company = Company(API_KEY, company_number='03008575', cache=cache)
         self.assertIsNone(cache.get_url(company.url))
         self.assertIsInstance(company.get(), dict)
         self.assertIsInstance(cache.get_url(company.url), dict)
+        self.assertEqual(company.get(), cache.get_url(company.url))
 
 
 def test_suite():
@@ -73,5 +74,5 @@ def test_suite():
     suite.addTest(unittest.makeSuite(CompanyTestCase))
     return suite
 
-if __name__ == '__main__':
+if __name__ == '__main__':   # pragma: no cover
     unittest.main()
