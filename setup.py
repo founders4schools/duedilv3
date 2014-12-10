@@ -1,11 +1,14 @@
-from setuptools import setup, find_packages
-from setuptools.command.test import test as TestCommand
-import sys, os
+import os
+import sys
+
+from setuptools import find_packages, setup
+from setuptools.command.test import test as test_command
 
 
-class PyTest(TestCommand):
+class PyTest(test_command):
+
     def finalize_options(self):
-        TestCommand.finalize_options(self)
+        test_command.finalize_options(self)
         self.test_args = []
         self.test_suite = True
 
@@ -16,17 +19,19 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 
-version = '0.1'
+version = '0.2'
 
 setup(name='duedil',
       version=version,
       description="Duedil API client",
       long_description=(
-        open("README.rst").read() + "\n" +
-        open(os.path.join("docs", "HISTORY.txt")).read() + "\n" +
-        open(os.path.join("docs", "TODO.txt")).read()
+          open("README.rst").read() + "\n" +
+          open(os.path.join("docs", "HISTORY.txt")).read() + "\n" +
+          open(os.path.join("docs", "TODO.txt")).read()
       ),
-      classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+      classifiers=[],
+      # Get strings from
+      # http://pypi.python.org/pypi?%3Aaction=list_classifiers
       keywords='duedil, api',
       author='Christian Ledermann',
       author_email='christian.ledermann@gmail.com',

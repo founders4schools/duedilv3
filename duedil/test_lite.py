@@ -18,6 +18,7 @@
 
 import unittest
 
+from .cache import Cache
 from .v3lite import Client, Company
 
 API_KEY = 'hnkc6ew2pbua2mf296kq8yaa'
@@ -50,10 +51,17 @@ class CompanyTestCase(unittest.TestCase):
         company = Company(API_KEY, company_number='06999618')
         self.assertEqual(len(company.__dict__), 4)
         self.assertNotEqual(len(company.category), 0)
-        self.assertNotEqual(len(company.__dict__), 4)
+        self.assertEqual(len(company.__dict__), 17)
         self.assertEqual(company.name, 'DUEDIL LIMITED')
         postcode = company.registered_address['postcode']
         self.assertEqual(postcode, 'WC1R 4AG')
+
+    def test_cache(self):
+        cache = Cache()
+        company = Company(API_KEY, company_number='06999618', cache=cache)
+        self.assertIsNone(cache.get_url(company.url))
+        self.assertIsInstance(company.get(), dict)
+        self.assertIsInstance(cache.get_url(company.url), dict)
 
 
 def test_suite():
