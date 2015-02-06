@@ -1,1 +1,3 @@
 duedil/secrets.py
+*.pyc
+*egg*
