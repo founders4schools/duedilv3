@@ -201,9 +201,9 @@ class Director(_EndPoint):
             results = self._get('service-addresses')
             address_list = []
             for r in results['response']['data']:
+                r['locale'] = r.get('locale', self.locale)
                 address_list.append(
                     ServiceAddress(self.api_key,
-                                   locale=self.locale,
                                    sandbox=self.sandbox,
                                    **r)
                 )
@@ -218,8 +218,9 @@ class Director(_EndPoint):
             results = self._get('companies')
             company_list = []
             for r in results['response']['data']:
+                r['locale'] = r.get('locale', self.locale)
                 company_list.append(
-                    Company(self.api_key, locale=self.locale,
+                    Company(self.api_key,
                             sandbox=self.sandbox, **r)
                 )
             self._companies = company_list
@@ -233,8 +234,10 @@ class Director(_EndPoint):
             results = self._get('directorships')
             directorships_list = []
             for r in results['response']['data']:
+                if not r.get('locale'):
+                    r['locale'] = self.locale
                 directorships_list.append(
-                    DirectorShip(self.api_key, locale=self.locale,
+                    DirectorShip(self.api_key,
                                  sandbox=self.sandbox, **r)
                 )
             self._directorships = directorships_list
@@ -271,8 +274,9 @@ class Company(_EndPoint):
             results = self._get('directors')
             director_list = []
             for r in results['response']['data']:
+                r['locale'] = r.get('locale', self.locale)
                 director_list.append(
-                    Director(self.api_key, locale=self.locale,
+                    Director(self.api_key,
                              sandbox=self.sandbox, **r)
                 )
             self._directors = director_list
@@ -316,8 +320,9 @@ class Company(_EndPoint):
             results = self._get('directorships')
             directorships_list = []
             for r in results['response']['data']:
+                r['locale'] = r.get('locale', self.locale)
                 directorships_list.append(
-                    DirectorShip(self.api_key, locale=self.locale,
+                    DirectorShip(self.api_key,
                                  sandbox=self.sandbox, **r)
                 )
             self._directorships = directorships_list
@@ -332,8 +337,9 @@ class Company(_EndPoint):
             try:
                 results = self._get('subsidiaries')
                 for r in results['response']['data']:
+                    r['locale'] = r.get('locale', self.locale)
                     subsidiaries_list.append(
-                        Company(self.api_key, locale=self.locale,
+                        Company(self.api_key,
                                 sandbox=self.sandbox, **r)
                     )
             except HTTPError as e:
@@ -352,7 +358,8 @@ class Company(_EndPoint):
             try:
                 results = self._get('parent')
                 p_data = results['response']
-                self._parent = Company(self.api_key, locale=self.locale,
+                p_data['locale'] = p_data.get('locale', self.locale)
+                self._parent = Company(self.api_key,
                                        sandbox=self.sandbox, **p_data)
                 self._has_parent = True
             except HTTPError as e:
