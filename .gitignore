@@ -1,3 +1,5 @@
 duedil/secrets.py
 *.pyc
 *egg*
+.coverage
+
