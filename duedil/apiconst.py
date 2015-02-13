@@ -767,3 +767,5 @@ COMPANY_ALLOWED_ATTRIBUTES = [
     'turnover',
     'turnover_delta_percentage',
 ]
+
+ACCOUNT_LIST = []

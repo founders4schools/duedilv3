@@ -49,6 +49,8 @@ setup(name='duedil',
       zip_safe=False,
       install_requires=[
           # -*- Extra requirements: -*-
+          'requests>=2,<3',
+          'six==1.9.0'
       ],
       tests_require=['pytest'],
       cmdclass = {'test': PyTest},

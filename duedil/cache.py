@@ -17,16 +17,29 @@
 #
 #
 
+import hashlib
+import six
+
+from collections import OrderedDict
+
 
 class Cache(object):
 
     _raw_dict = {}
 
     def __init__(self, raw_dict={}):
-        self._raw_dict = raw_dict
+        self._raw_dict = {}
 
-    def get_url(self, url):
-        return self._raw_dict.get(url, None)
+    def _cache_key(self, key, url_params):
+        cache_key = key
+        if url_params:
+            cache_key += six.text_type(OrderedDict(url_params))
+        return hashlib.md5(six.b(key)).hexdigest()
 
-    def set_url(self, url, data):
-        self._raw_dict[url] = data
+    def get_url(self, url, url_params=None):
+        cache_key = self._cache_key(url, url_params)
+        return self._raw_dict.get(cache_key, None)
+
+    def set_url(self, url, data, url_params=None):
+        cache_key = self._cache_key(url, url_params)
+        self._raw_dict[cache_key] = data
