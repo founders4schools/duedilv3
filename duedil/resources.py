@@ -16,7 +16,7 @@
 #  under the License.
 #
 
-from __future__ import print_function, unicode_literals
+from __future__ import unicode_literals
 
 import sys
 import six
@@ -35,13 +35,15 @@ class Resource(object):
         if not self._allowed_attributes:
             raise NotImplementedError(
                 "Resources must include a list of allowed attributes")
+        if kwargs:
+            self._set_attributes(**kwargs)
 
-    def _set_attributes(self, missing, **kwargs):
+    def _set_attributes(self, missing=False, **kwargs):
         for k, v in kwargs.items():
-            if k not in self._allowed_attributes:
-                print ("'%s'," % k)
-            self.__setattr__(k, v)
-        if missing:
+            if k in self._allowed_attributes:
+                self.__setattr__(k, v)
+
+        if missing is True:
             for allowed in self._allowed_attributes:
                 if allowed not in kwargs:
                     self.__setattr__(allowed, None)
@@ -52,11 +54,11 @@ class LoadableResource(Resource):
 
     def __init__(self, client, id=None, locale='uk',
                  **kwargs):
+        super(LoadableResource, self).__init__(**kwargs)
         self.id = id
         assert(locale in ['uk', 'roi'])
         self.locale = locale
         self.client = client
-        self._set_attributes(missing=False, **kwargs)
 
     def __getattribute__(self, name):
         """
@@ -140,6 +142,7 @@ class RelatedResourceMixin(six.with_metaclass(RelatedResourceMeta, object)):
             result = self._get(key)
             if result:
                 response = result['response']
+                related = None
                 if (
                     'data' in response and
                     isinstance(response['data'], (list, tuple))
@@ -150,12 +153,11 @@ class RelatedResourceMixin(six.with_metaclass(RelatedResourceMeta, object)):
                         related.append(
                             klass(self.client, **r) if klass else None
                         )
-                    setattr(self, internal_key, related)
                 elif result:
                     response['locale'] = response.get('locale', self.locale)
                     if klass:
                         related = klass(self.client, **response)
-                    setattr(self, internal_key, related)
+                setattr(self, internal_key, related)
         return related
 
 
@@ -206,6 +208,7 @@ class Company(RelatedResourceMixin, LoadableResource):
 
     related_resources = {
         'service-addresses': ServiceAddress,
+        'registered-address': RegisteredAddress,
         'directors': 'Director',
         'parent': 'Company',
         'directors': 'Director',

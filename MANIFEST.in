@@ -1,4 +1,0 @@
-include *.rst
-recursive-include docs *.txt
-recursive-exclude *.pyc *.pyo
-include LICENSE.txt

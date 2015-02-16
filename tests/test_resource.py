@@ -78,9 +78,7 @@ class ResourceTestCase(unittest.TestCase):
             TestResource()
 
     def test_resource_set_attribute(self):
-        res = TestAttrResource()
-
-        res._set_attributes(False, name="Duedil")
+        res = TestAttrResource(name="Duedil")
 
         self.assertEqual(res.name, 'Duedil')
         self.assertFalse(hasattr(res, 'id'))
