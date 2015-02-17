@@ -20,79 +20,55 @@ from __future__ import unicode_literals
 
 import sys
 import six
+import json
 
-from .apiconst import (COMPANY_ALLOWED_ATTRIBUTES,
-                       DIRECTOR_ALLOWED_ATTRIBUTES,
-                       DIRECTORSHIPS_ALLOWED_ATTRIBUTES,
-                       REGISTERED_ADDRESS_ALLOWED_ATTRIBUTES,
-                       SERVICE_ADDRESS_ALLOWED_ATTRIBUTES)
+from .api import api_client
 
 
 class Resource(object):
-    _allowed_attributes = None
+    attribute_names = None
+    locale = 'uk'
+    id = None
+    path = None
 
-    def __init__(self, *args, **kwargs):
-        if not self._allowed_attributes:
+    def __init__(self, id=None, locale=None, load=False, **kwargs):
+        if not self.attribute_names:
             raise NotImplementedError(
                 "Resources must include a list of allowed attributes")
+
+        self.id = id
+        self.locale = locale if locale else None
+
+        if load:
+            self.load()
+
         if kwargs:
             self._set_attributes(**kwargs)
 
     def _set_attributes(self, missing=False, **kwargs):
         for k, v in kwargs.items():
-            if k in self._allowed_attributes:
+            if k in self.attribute_names:
                 self.__setattr__(k, v)
 
         if missing is True:
-            for allowed in self._allowed_attributes:
+            for allowed in self.attribute_names:
                 if allowed not in kwargs:
                     self.__setattr__(allowed, None)
 
-
-class LoadableResource(Resource):
-    _endpoint = None
-
-    def __init__(self, client, id=None, locale='uk',
-                 **kwargs):
-        super(LoadableResource, self).__init__(**kwargs)
-        self.id = id
-        assert(locale in ['uk', 'roi'])
-        self.locale = locale
-        self.client = client
-
-    def __getattribute__(self, name):
-        """
-        lazily return attributes, only contact duedil if necessary
-        """
-        try:
-            return super(LoadableResource, self).__getattribute__(name)
-        except AttributeError:
-            if name in self._allowed_attributes:
-                self.load()
-                return super(LoadableResource, self).__getattribute__(name)
-            else:
-                raise
-
-    def _assign_attributes(self, data=None):
-        assert(data['response'].get('id') == self.id)
-        self._set_attributes(missing=True, **data['response'])
-
     def load(self):
-        """
-        get results from duedil
-        """
-        endpoint = self.endpoint
-        if self.id:
-            endpoint = endpoint.format(id=self.id)
-        result = self.client.get(endpoint)
-        self._assign_attributes(result)
-        return result
+        result = api_client.get(self.endpoint)
+        self._set_attributes(**result)
 
     @property
     def endpoint(self):
-        endpoint = self._endpoint
+        if not self.path:
+            raise ValueError(
+                "{model} does not have a path to load specified".format(
+                    model=self.__class__.__name__))
+        endpoint = '{locale}/{path}'.format(locale=self.locale,
+                                            path=self.path)
         if self.id:
-            endpoint = endpoint.format(id=self.id)
+            endpoint += '/{id}'.format(id=self.id)
         return endpoint
 
 
@@ -102,6 +78,67 @@ def resource_property(endpoint):
             return getter_fn(self, endpoint, *args, **kwargs)
         return inner
     return wrap
+
+
+def _build_search_string(self, term_filters, range_filters,
+                         order_by=None, limit=None, offset=None,
+                         **kwargs):
+    data = {}
+
+    for arg in kwargs:
+        if arg in term_filters:
+            # this must be a string
+            assert(isinstance(kwargs[arg], six.string_types))
+        elif arg in range_filters:
+            # array of two numbers
+            assert(isinstance(kwargs[arg], (list, tuple)))
+            assert(len(kwargs[arg]) == 2)
+            for v in kwargs[arg]:
+                assert(isinstance(v, (float, six.integer_types)))
+        else:
+            raise TypeError(
+                "{arg} is not available as a filter".format(arg=arg))
+
+    if kwargs:
+        data['filters'] = json.dumps(kwargs)
+
+    if order_by:
+        assert(isinstance(order_by, dict))
+        assert('field' in order_by)
+        assert(
+            order_by['field'] in term_filters + range_filters)
+        if order_by.get('direction'):
+            assert(order_by['direction'] in ['asc', 'desc'])
+        data['orderBy'] = json.dumps(order_by)
+
+    if limit:
+        assert(isinstance(limit, int))
+        data['limit'] = limit
+
+    if offset:
+        assert(isinstance(offset, int))
+        data['offset'] = offset
+
+    return data
+
+
+class SearchableResourceMeta(type):
+    term_filters = None
+    range_filters = None
+    search_path = None
+
+    def search(klass, order_by=None, limit=None, offset=None, **kwargs):
+        data = _build_search_string(klass.term_filters,
+                                    klass.range_filters,
+                                    order_by=order_by, limit=limit,
+                                    offset=offset, **kwargs)
+        results_raw = api_client.get(klass.search_path, data=data)
+        results = []
+        for r in results_raw['response']['data']:
+            results.append(
+                klass(**r)
+            )
+        return results
 
 
 class RelatedResourceMeta(type):
@@ -131,7 +168,7 @@ class RelatedResourceMixin(six.with_metaclass(RelatedResourceMeta, object)):
     def _get(self, resource):
         uri = '{endpoint}/{resource}'.format(endpoint=self.endpoint,
                                              resource=resource)
-        return self.client.get(uri)
+        return api_client.get(uri)
 
     def load_related(self, key, klass=None):
         internal_key = '_' + key.replace('-', '_')
@@ -151,151 +188,11 @@ class RelatedResourceMixin(six.with_metaclass(RelatedResourceMeta, object)):
                     for r in result['response']['data']:
                         r['locale'] = r.get('locale', self.locale)
                         related.append(
-                            klass(self.client, **r) if klass else None
+                            klass(**r) if klass else None
                         )
                 elif result:
                     response['locale'] = response.get('locale', self.locale)
                     if klass:
-                        related = klass(self.client, **response)
+                        related = klass(**response)
                 setattr(self, internal_key, related)
         return related
-
-
-class ServiceAddress(Resource):
-    _allowed_attributes = SERVICE_ADDRESS_ALLOWED_ATTRIBUTES
-
-
-class RegisteredAddress(Resource):
-    _allowed_attributes = REGISTERED_ADDRESS_ALLOWED_ATTRIBUTES
-
-
-class DirectorShip(Resource):
-    _allowed_attributes = DIRECTORSHIPS_ALLOWED_ATTRIBUTES
-
-
-class Account(Resource):
-    pass
-
-
-class PreviousCompanyName(Resource):
-    pass
-
-
-class Industry(Resource):
-    pass
-
-
-class Shareholder(Resource):
-    pass
-
-
-class BankAccount(Resource):
-    pass
-
-
-class Mortgage(Resource):
-    pass
-
-
-class Document(Resource):
-    pass
-
-
-class Company(RelatedResourceMixin, LoadableResource):
-
-    _endpoint = 'companies/{id}'
-    _allowed_attributes = COMPANY_ALLOWED_ATTRIBUTES
-
-    related_resources = {
-        'service-addresses': ServiceAddress,
-        'registered-address': RegisteredAddress,
-        'directors': 'Director',
-        'parent': 'Company',
-        'directors': 'Director',
-        'directorships': DirectorShip,
-        'accounts': Account,
-        'previous-company-names': PreviousCompanyName,
-        'industries': Industry,
-        'shareholders': Shareholder,
-        'bank-accounts': BankAccount,
-        'mortgages': Mortgage,
-        'subsidiaries': 'Company'
-    }
-
-
-class Director(LoadableResource):
-
-    _endpoint = 'directors/{id}'
-
-    _allowed_attributes = DIRECTOR_ALLOWED_ATTRIBUTES
-    related_resources = {
-        'companies': Company,
-        'directorships': DirectorShip
-    }
-
-
-class LiteCompany(LoadableResource):
-    _endpoint = "company/{id}"
-    _allowed_attributes = [
-        'duedil_url',
-        # string the url of the full company profile on duedil.com
-        'company_number',
-        # string the company number
-        'name',
-        # string the company name
-        'name_formated',
-        # string a more readable version of the company name
-        'registered_address',
-        # obj Holds address information about the company
-        # 'registered_address.string',
-        # string Full registered address of the company, formatted as a
-        # string.
-        # 'registered_address.postcode',
-        # string The postcode (if available) of the company
-        # 'registered_address.full_address',
-        # array array containing the individual address lines
-        'category',
-        # string The category of company eg "Public Limited Company"
-        'status',
-        # string a string describing the status of company eg "In
-        # Liquidation"
-        'locale',
-        # string Either "United Kingdom" or "Republic of Ireland"
-        'previous_names',
-        # array a collection containing one or more previous name
-        # objects
-        # 'previous_names[].name',
-        # string the raw previous name of the company
-        # 'previous_names[].name_formatted',
-        # string a more readable version of the previous name
-        # 'previous_names[].ended_date',
-        # string when the company ceased using this name [YYYY-MM-DD]
-        'sic_codes',
-        # array a collection containing one or more SIC code objects
-        # 'sic_codes[].code',
-        # string The SIC code
-        # 'sic_codes[].description',
-        # string Description of the SIC code
-        # 'sic_codes[].type',
-        # string Either "primary" or "secondary"
-        'incorporation_date',
-        # string when the company was incorporated. [YYYY-MM-DD]
-        'accounts',
-        # obj Information about the most recent accounts
-        # 'accounts.accounts_date',
-        # string Date of latest accounts. [YYYY-MM-DD]
-        # 'accounts.type',
-        # string The type of accounts filed. eg "Full"
-        'returns',
-        # obj information about the company's returns
-        # 'returns.last_returns_date',
-        # string Date of the last returns. [YYYY-MM-DD]
-    ]
-
-    def __init__(self, client, company_number=None, **kwargs):
-        super(LiteCompany, self).__init__(client, id=company_number,
-                                          **kwargs)
-
-    def _assign_attributes(self, data=None):
-        assert(data.get('company_number') == self.id)
-        self._set_attributes(missing=True, **data)
