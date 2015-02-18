@@ -149,9 +149,11 @@ class SearchDirectorsTestCase(unittest.TestCase):
     def test_results(self):
         if not SANDBOX:  # pragma: no cover
             time.sleep(1)
-            directors, raw = self.client.search_director(name='John')
-            self.assertIsInstance(directors[0], Director)
-            self.assertIsInstance(raw, dict)
+            directors = self.client.search_director(name='John')
+            for director in directors.items():
+                self.assertIsInstance(director, Director)
+                break
+
 
 
 class CompanyTestCase(unittest.TestCase):
