@@ -505,19 +505,13 @@ class Client(object):
         Searching by financial range will return directors who have a
         directorship at a company fulfilling that range.
 
-        NB: The location filter is not available for director search.
+        NB: The location filter is not (yet) available for director search.
         '''
         data = self._build_search_string(DIRECTOR_TERM_FILTERS,
                                          DIRECTOR_RANGE_FILTERS,
                                          order_by=order_by, limit=limit,
                                          offset=offset, **kwargs)
-        req = urlopen('%s/directors?%s'
-                      % (self.url, urlencode(data)))
-        results = json.loads(req.read().decode('utf-8'))
-        directors = []
-        for r in results['response']['data']:
-            directors.append(
-                Director(
-                    self.api_key, sandbox=self.sandbox, cache=self.cache, **r)
-            )
-        return directors, results
+        url = '%s/directors?%s' % (self.url, urlencode(data))
+        results = ResultSet(Director, url, self.api_key,
+                            sandbox=self.sandbox, cache=self.cache)
+        return results
