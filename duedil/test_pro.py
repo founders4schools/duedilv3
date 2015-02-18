@@ -76,12 +76,10 @@ class SearchCompaniesTestCase(unittest.TestCase):
     def test_order_by(self):
         with self.assertRaises(AssertionError):
             self.client.search_company(name='ex', order_by='None')
-        # does not seem to work on sandbox
-        if not SANDBOX:  # pragma: no cover
-            time.sleep(1)
-            self.client.search_company(
-                order_by={'field': 'turnover', 'direction': 'desc'},
-                name='ex')
+        time.sleep(1)
+        self.client.search_company(
+            order_by={'field': 'turnover', 'direction': 'desc'},
+            name='Ex')
 
     def test_limit(self):
         with self.assertRaises(AssertionError):

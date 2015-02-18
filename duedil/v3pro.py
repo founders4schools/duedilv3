@@ -137,7 +137,7 @@ class ResultSet(object):
         return len(self._results['response']['data'])
 
     def _get_results(self, url):
-        # caching can be applied here
+        # XXX caching should be applied here
         req = urlopen(url)
         results = json.loads(req.read().decode('utf-8'))
         return results
@@ -458,7 +458,7 @@ class Client(object):
                 order_by['field'] in term_filters + range_filters)
             if order_by.get('direction'):
                 assert(order_by['direction'] in ['asc', 'desc'])
-            data['orderBy'] = json.dumps(order_by)
+            data['orderBy'] = json.dumps({order_by['field']:order_by['direction']})
         if limit:
             assert(isinstance(limit, int))
             data['limit'] = limit
