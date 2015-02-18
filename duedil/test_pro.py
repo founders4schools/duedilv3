@@ -86,20 +86,35 @@ class SearchCompaniesTestCase(unittest.TestCase):
     def test_limit(self):
         with self.assertRaises(AssertionError):
             self.client.search_company(name='ex', limit='0')
-        companies, raw = self.client.search_company(name='ex', limit=1)
+        companies = self.client.search_company(name='ex', limit=1)
         self.assertEqual(len(companies), 1)
 
     def test_offset(self):
         with self.assertRaises(AssertionError):
             self.client.search_company(name='ex', offset='0')
-        companies, raw = self.client.search_company(name='ex', offset=50000)
+        companies = self.client.search_company(name='ex', offset=50000)
         self.assertEqual(len(companies), 0)
 
     def test_results(self):
         time.sleep(1)
-        companies, raw = self.client.search_company(name='ex')
-        self.assertIsInstance(companies[0], Company)
-        self.assertIsInstance(raw, dict)
+        companies = self.client.search_company(name='ex')
+        for company in companies.items():
+            self.assertIsInstance(company, Company)
+            break
+
+    def test_results_pagination(self):
+        time.sleep(1)
+        companies = self.client.search_company(name='ex', limit =2)
+        self.assertNotEqual(companies.count(), 2)
+        i = 0
+        for company in companies.items():
+            i += 1
+            self.assertIsInstance(company, Company)
+            self.assertEqual(len(companies), 2)
+            if i > 5:
+                break
+
+
 
 
 class SearchDirectorsTestCase(unittest.TestCase):
@@ -152,7 +167,7 @@ class CompanyTestCase(unittest.TestCase):
         self.assertEqual(len(company.__dict__), 6)
         self.assertIsInstance(company.get(), dict)
         self.assertNotEqual(len(company.name), 0)
-        self.assertEqual(len(company.__dict__), 131)
+        self.assertEqual(len(company.__dict__), 132)
 
     def test_init(self):
         company = Company(
@@ -166,7 +181,7 @@ class CompanyTestCase(unittest.TestCase):
         company = Company(API_KEY, self.company_id, 'uk', SANDBOX)
         self.assertEqual(len(company.__dict__), 6)
         self.assertNotEqual(len(company.name), 0)
-        self.assertEqual(len(company.__dict__), 131)
+        self.assertEqual(len(company.__dict__), 132)
 
     def test_invalid_attribute(self):
         time.sleep(1)

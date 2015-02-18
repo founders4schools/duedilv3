@@ -123,6 +123,45 @@ class _EndPoint(object):
         return self._url
 
 
+class ResultSet(object):
+
+    def __init__(self, cls, url, api_key, sandbox=False, cache=None):
+        self.cls = cls
+        self._results = self._get_results(url)
+        self._url = url
+        self.api_key = api_key
+        self.sandbox = sandbox
+        self.cache = cache
+
+    def __len__(self):
+        return len(self._results['response']['data'])
+
+    def _get_results(self, url):
+        # caching can be applied here
+        req = urlopen(url)
+        results = json.loads(req.read().decode('utf-8'))
+        return results
+
+    @property
+    def _next_url(self):
+        url = self._results['response']['pagination'].get('next_url')
+        if url:
+            return '%s&api_key=%s' % (url, self.api_key)
+
+    def count(self):
+        return self._results['response']['pagination']['total']
+
+    def items(self):
+        for r in self._results['response']['data']:
+            yield self.cls(self.api_key, sandbox=self.sandbox,
+                           cache=self.cache, **r)
+        while self._next_url:
+            self._results = self._get_results(self._next_url)
+            for r in self._results['response']['data']:
+                yield self.cls(self.api_key, sandbox=self.sandbox,
+                               cache=self.cache, **r)
+
+
 class ServiceAddress(_EndPoint):
 
     _name = 'service-addresses'
@@ -382,9 +421,6 @@ class Company(_EndPoint):
 
 class Client(object):
 
-    last_company_response = {}
-    last_director_response = {}
-
     def __init__(self, api_key, sandbox=False, cache=None):
         self.api_key = api_key
         self.sandbox = sandbox
@@ -454,17 +490,10 @@ class Client(object):
                                          COMPANY_RANGE_FILTERS,
                                          order_by=order_by, limit=limit,
                                          offset=offset, **kwargs)
-        req = urlopen('%s/companies?%s'
-                      % (self.url, urlencode(data)))
-        results = json.loads(req.read().decode('utf-8'))
-        self.last_company_response = results
-        companies = []
-        for r in results['response']['data']:
-            companies.append(
-                Company(
-                    self.api_key, sandbox=self.sandbox, cache=self.cache, **r)
-            )
-        return companies, results
+        url = '%s/companies?%s' % (self.url, urlencode(data))
+        results = ResultSet(Company, url, self.api_key,
+                            sandbox=self.sandbox, cache=self.cache)
+        return results
 
     def search_director(self, order_by=None, limit=None, offset=None,
                         **kwargs):

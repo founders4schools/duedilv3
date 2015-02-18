@@ -389,7 +389,7 @@ DIRECTOR_RANGE_FILTERS = [
 
 
 SERVICE_ADDRESS_ALLOWED_ATTRIBUTES = [
-    # 'id',
+    'id',
     # string
     'last_update',
     # dateTime Date of last update
@@ -410,7 +410,7 @@ SERVICE_ADDRESS_ALLOWED_ATTRIBUTES = [
 ]
 
 REGISTERED_ADDRESS_ALLOWED_ATTRIBUTES = [
-    # 'id',
+    'id',
     # string The registered ID of the company
     'last_update',
     # dateTime Date of last update
@@ -490,7 +490,7 @@ DIRECTORSHIPS_ALLOWED_ATTRIBUTES = [
 ]
 
 DIRECTOR_ALLOWED_ATTRIBUTES = [
-    # 'id',
+    'id',
     # string Director ID
     'last_update',
     # dateTime Date last updated
@@ -541,7 +541,8 @@ DIRECTOR_ALLOWED_ATTRIBUTES = [
 ]
 
 COMPANY_ALLOWED_ATTRIBUTES = [
-    # this is filled by __init__ and must match this value 'id',
+    'id',
+    # 'id' is filled by __init__ and must match this value
     # integer The registered company number (ID) of the company
     'last_update',
     # dateTime Date last updated
@@ -766,4 +767,5 @@ COMPANY_ALLOWED_ATTRIBUTES = [
     'company_url',
     'turnover',
     'turnover_delta_percentage',
+    'voluntary_agreement',
 ]
