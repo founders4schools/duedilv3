@@ -5,6 +5,12 @@ from setuptools import find_packages, setup
 from setuptools.command.test import test as test_command
 
 
+def read(*paths):
+    """Build a file path from *paths* and return the contents."""
+    with open(os.path.join(*paths), 'r') as f:
+        return f.read()
+
+
 class PyTest(test_command):
 
     def finalize_options(self):
@@ -24,11 +30,9 @@ version = '0.2.1'
 setup(name='duedil',
       version=version,
       description="Duedil API client",
-      long_description=(
-          open("README.rst").read() + "\n" +
-          open(os.path.join("docs", "HISTORY.txt")).read() + "\n" +
-          open(os.path.join("docs", "TODO.txt")).read()
-      ),
+      long_description=(read('README.rst') + '\n\n' +
+                        read('docs', 'HISTORY.rst') + '\n\n' +
+                        read('docs', 'TODO.rst')),
       classifiers=['Intended Audience :: Developers',
                    'License :: OSI Approved :: Apache Software License',
                    'Programming Language :: Python :: 3',

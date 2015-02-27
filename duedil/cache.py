@@ -24,6 +24,12 @@ from collections import OrderedDict
 
 
 class Cache(object):
+    """
+    Basic in-memory cache implementation.
+
+    The key-values are stored internally as a dictionary. An existing
+    dictionary can be passed to the constructor to initialise.
+    """
 
     _raw_dict = {}
 
@@ -37,9 +43,22 @@ class Cache(object):
         return hashlib.md5(six.b(key)).hexdigest()
 
     def get_url(self, url, url_params=None):
+        """
+        get the value in cache or None if URL doesn't match any
+
+        :param url: The URL to query
+        :return: the value in cache or None
+        """
         cache_key = self._cache_key(url, url_params)
         return self._raw_dict.get(cache_key, None)
 
     def set_url(self, url, data, url_params=None):
+        """
+        Store the data for given URL in cache, override any previously present value
+
+        :param url: The URL as key
+        :param data: The value to store
+        :return: Nothing
+        """
         cache_key = self._cache_key(url, url_params)
         self._raw_dict[cache_key] = data

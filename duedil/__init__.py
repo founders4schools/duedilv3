@@ -15,3 +15,19 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 #
+
+"""
+Python `Duedil API <https://developer.duedil.com/>`_ Wrapper, written to access the v3 API.
+
+Lets you interact easily with Duedil directly from your Python code. The project is
+hosted on `Github <https://github.com/founders4schools/duedilv3>`_ and is referenced on
+`PyPI <https://pypi.python.org/pypi/duedil>`_.
+
+Installation
+------------
+
+As all PyPI hosted package, installation is very simple, just run::
+
+    sudo pip install duedil
+
+"""
