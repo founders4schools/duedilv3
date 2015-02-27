@@ -3,3 +3,4 @@ duedil/secrets.py
 *egg*
 .coverage
 
+venv/*
