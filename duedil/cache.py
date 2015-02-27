@@ -19,6 +19,12 @@
 
 
 class Cache(object):
+    """
+    Basic in-memory cache implementation.
+
+    The key-values are stored internally as a dictionary. An existing
+    dictionary can be passed to the constructor to initialise.
+    """
 
     _raw_dict = {}
 
@@ -26,7 +32,20 @@ class Cache(object):
         self._raw_dict = raw_dict
 
     def get_url(self, url):
+        """
+        get the value in cache or None if URL doesn't match any
+
+        :param url: The URL to query
+        :return: the value in cache or None
+        """
         return self._raw_dict.get(url, None)
 
     def set_url(self, url, data):
+        """
+        Store the data for given URL in cache, override any previously present value
+
+        :param url: The URL as key
+        :param data: The value to store
+        :return: Nothing
+        """
         self._raw_dict[url] = data

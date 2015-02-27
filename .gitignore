@@ -4,3 +4,4 @@ duedil/secrets.py
 .coverage
 
 venv/*
+docs/build

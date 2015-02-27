@@ -474,8 +474,9 @@ class Client(object):
         Apply any combination of 44 different filters
 
         The parameter filters supports two different types of queries:
-            * the “range” type (ie, a numeric range) and
-            * the “terms” type (for example, an individual company name).
+
+        * the “range” type (ie, a numeric range) and
+        * the “terms” type (for example, an individual company name).
 
         For the range filter, you have to pass an array;
         for the terms filter, you just pass a string.
