@@ -3,6 +3,13 @@
 History
 =======
 
+0.3 (2015/02/27)
+----------------
+
+- Company and Directors searches are returning a result set instead of a list
+- Change in ordering of search results
+
+
 0.2 (2014/12/10)
 ----------------
 
