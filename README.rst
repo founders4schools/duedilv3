@@ -1,5 +1,5 @@
-DueDil API v3 |pypi| |build-status| |coverage-status| |waffle|
-==============================================================
+DueDil API v3 |pypi| |build-status| |coverage-status| |waffle| |docs|
+=====================================================================
 
 This is a Python implementation of the `DueDil v3 API`_
 
@@ -16,4 +16,8 @@ This is a Python implementation of the `DueDil v3 API`_
 .. |waffle| image:: https://badge.waffle.io/founders4schools/duedilv3.png?label=ready&title=Ready
     :target: https://waffle.io/founders4schools/duedilv3
     :alt: 'Stories in Ready'
+
+.. |docs| image:: https://readthedocs.org/projects/duedilv3/badge/?version=latest
+    :target: https://readthedocs.org/projects/duedilv3/?badge=latest
+    :alt: Documentation Status
 .. _DueDil v3 API: https://developer.duedil.com/
