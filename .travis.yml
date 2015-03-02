@@ -16,5 +16,4 @@ after_success:
     coveralls
 
 notifications:
-  email:
-    - christian.ledermann@gmail.com
+  slack: f4s:u17h2Cc7RhhHNtypnAu7jbgY
