@@ -72,6 +72,53 @@ class Resource(object):
         return endpoint
 
 
+class LoadableResource(Resource):
+    _endpoint = None
+
+    def __init__(self, client, id=None, locale='uk',
+                 **kwargs):
+        super(LoadableResource, self).__init__(**kwargs)
+        self.id = id
+        assert(locale in ['uk', 'roi'])
+        self.locale = locale
+        self.client = client
+
+    def __getattribute__(self, name):
+        """
+        lazily return attributes, only contact duedil if necessary
+        """
+        try:
+            return super(LoadableResource, self).__getattribute__(name)
+        except AttributeError:
+            if name in self._allowed_attributes:
+                self.load()
+                return super(LoadableResource, self).__getattribute__(name)
+            else:
+                raise
+
+    def _assign_attributes(self, data=None):
+        assert(data['response'].get('id') == self.id)
+        self._set_attributes(missing=True, **data['response'])
+
+    def load(self):
+        """
+        get results from duedil
+        """
+        endpoint = self.endpoint
+        if self.id:
+            endpoint = endpoint.format(id=self.id)
+        result = self.client.get(endpoint)
+        self._assign_attributes(result)
+        return result
+
+    @property
+    def endpoint(self):
+        endpoint = self._endpoint
+        if self.id:
+            endpoint = endpoint.format(id=self.id)
+        return endpoint
+
+
 def resource_property(endpoint):
     def wrap(getter_fn):
         def inner(self, *args, **kwargs):

@@ -56,7 +56,7 @@ setup(name='duedil',
           'requests>=2,<3',
           'six==1.9.0'
       ],
-      tests_require=['pytest'],
+      tests_require=['pytest', 'requests_mock'],
       cmdclass = {'test': PyTest},
       entry_points="""
       # -*- Entry points: -*-

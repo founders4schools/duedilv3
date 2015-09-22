@@ -24,9 +24,9 @@ import json
 import requests_mock
 from requests.exceptions import HTTPError
 
-from duedil.client import Client, LiteClient,  ProClient, I12Client
+from duedil.api import Client
 from duedil.cache import Cache
-from duedil.resources import LiteCompany, Company, Director
+from duedil.models import LiteCompany, Company, Director
 
 API_KEY = '12345'
 
@@ -107,7 +107,7 @@ class LiteClientTestCase(unittest.TestCase):
 
     @requests_mock.mock()
     def test_search(self, m):
-        client = LiteClient(API_KEY)
+        client = Client(API_KEY, api_type='lite')
         url = 'http://api.duedil.com/open/search.json'
         result = {
             'locale': 'uk',
@@ -125,11 +125,11 @@ class LiteClientTestCase(unittest.TestCase):
 
 class ProClientTestCase(unittest.TestCase):
 
-    client = ProClient(API_KEY)
+    client = Client(API_KEY)
 
     def test_sandbox(self):
         self.assertEqual(self.client.base_url, 'http://duedil.io/v3/uk')
-        sandbox_client = ProClient(API_KEY, sandbox=True)
+        sandbox_client = Client(API_KEY, sandbox=True)
         self.assertEqual(sandbox_client.base_url,
                          'http://duedil.io/v3/sandbox/uk')
 
@@ -172,7 +172,7 @@ class ProClientTestCase(unittest.TestCase):
 
 class SearchQueryTestCase(unittest.TestCase):
 
-    client = ProClient(API_KEY)
+    client = Client(API_KEY)
     url = 'http://duedil.io/v3/uk/companies.json'
 
     @requests_mock.mock()
@@ -227,12 +227,12 @@ class SearchQueryTestCase(unittest.TestCase):
 
 class I12ClientTestCase(unittest.TestCase):
 
-    client = I12Client(API_KEY)
+    client = Client(API_KEY, api_type='international')
 
     def test_sandbox(self):
         self.assertEqual(self.client.base_url,
                          'http://api.duedil.com/international')
-        sandbox_client = I12Client(API_KEY, sandbox=True)
+        sandbox_client = Client(API_KEY, sandbox=True, api_type='international')
         self.assertEqual(sandbox_client.base_url,
                          'http://api.duedil.com/international/sandbox')
 
