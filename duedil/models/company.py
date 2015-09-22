@@ -4,11 +4,11 @@ from __future__ import unicode_literals
 import six
 
 from ..resources import (Resource, RelatedResourceMixin,
-                         SearchableResourceMeta)
+                         SearchableRelatedResourceMeta)
 
 
 class Company(RelatedResourceMixin,
-              six.with_metaclass(SearchableResourceMeta, Resource)):
+              six.with_metaclass(SearchableRelatedResourceMeta, Resource)):
 
     path = 'companies'
 

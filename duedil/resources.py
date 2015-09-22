@@ -209,6 +209,10 @@ class RelatedResourceMeta(type):
                     property(getter, None, None, attr_name))
 
 
+class SearchableRelatedResourceMeta(SearchableResourceMeta, RelatedResourceMeta):
+    pass
+
+
 class RelatedResourceMixin(six.with_metaclass(RelatedResourceMeta, object)):
     related_resources = None
 

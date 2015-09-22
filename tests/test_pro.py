@@ -19,7 +19,7 @@
 import time
 import unittest
 
-from .v3pro import (Client, Company, Director, DirectorShip, RegisteredAddress,
+from duedil.v3pro import (Client, Company, Director, DirectorShip, RegisteredAddress,
                     ServiceAddress)
 
 try:  # pragma: no cover
