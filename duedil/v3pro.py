@@ -78,12 +78,12 @@ class _EndPoint(object):
 
     def _set_attributes(self, missing, **kwargs):
         for k, v in kwargs.items():
-            if k not in self._allowed_attributes:
+            if k not in self.attribute_names:
                 print ("'%s'," % k)
-            # assert(k in self._allowed_attributes)
+            # assert(k in self.attribute_names)
             self.__setattr__(k, v)
         if missing:
-            for allowed in self._allowed_attributes:
+            for allowed in self.attribute_names:
                 if allowed not in kwargs:
                     self.__setattr__(allowed, None)
 
@@ -94,7 +94,7 @@ class _EndPoint(object):
         try:
             return super(_EndPoint, self).__getattribute__(name)
         except AttributeError:
-            if name in self._allowed_attributes:
+            if name in self.attribute_names:
                 self.get()
                 return super(_EndPoint, self).__getattribute__(name)
             else:
@@ -126,7 +126,7 @@ class _EndPoint(object):
 class ServiceAddress(_EndPoint):
 
     _name = 'service-addresses'
-    _allowed_attributes = SERVICE_ADDRESS_ALLOWED_ATTRIBUTES
+    attribute_names = SERVICE_ADDRESS_ALLOWED_ATTRIBUTES
 
     def __init__(self, api_key, id, locale, sandbox=False, cache=None,
                  **kwargs):
@@ -143,7 +143,7 @@ class ServiceAddress(_EndPoint):
 class RegisteredAddress(_EndPoint):
 
     _name = 'registered-address'
-    _allowed_attributes = REGISTERED_ADDRESS_ALLOWED_ATTRIBUTES
+    attribute_names = REGISTERED_ADDRESS_ALLOWED_ATTRIBUTES
 
     def __init__(self, api_key, id, locale, sandbox=False, cache=None,
                  **kwargs):
@@ -160,7 +160,7 @@ class RegisteredAddress(_EndPoint):
 class DirectorShip(_EndPoint):
 
     _name = 'directorships'
-    _allowed_attributes = DIRECTORSHIPS_ALLOWED_ATTRIBUTES
+    attribute_names = DIRECTORSHIPS_ALLOWED_ATTRIBUTES
 
     def __init__(self, api_key, id, locale, sandbox=False, cache=None,
                  **kwargs):
@@ -181,7 +181,7 @@ class Director(_EndPoint):
     _companies = None
     _directorships = None
 
-    _allowed_attributes = DIRECTOR_ALLOWED_ATTRIBUTES
+    attribute_names = DIRECTOR_ALLOWED_ATTRIBUTES
 
     def __init__(self, api_key, id, locale, sandbox=False, cache=None,
                  **kwargs):
@@ -254,7 +254,7 @@ class Company(_EndPoint):
     _subsidiaries = None
     _parent = None
     _has_parent = None
-    _allowed_attributes = COMPANY_ALLOWED_ATTRIBUTES
+    attribute_names = COMPANY_ALLOWED_ATTRIBUTES
 
     def __init__(self, api_key, id, locale, sandbox=False, cache=None,
                  **kwargs):

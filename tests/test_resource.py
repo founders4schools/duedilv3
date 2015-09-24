@@ -36,24 +36,24 @@ class TestResource(Resource):
 
 
 class TestAttrResource(Resource):
-    _allowed_attributes = ['name', 'id']
+    attribute_names = ['name', 'id', 'category']
 
 
 class TestLoadableResource(LoadableResource):
-    _allowed_attributes = ['name', 'id']
+    attribute_names = ['name', 'id']
     _endpoint = "resources/{id}"
 
 
 class TestRelatedResource(Resource):
-    _allowed_attributes = ['name']
+    attribute_names = ['name']
 
 
 class TestRelatedLoadableResource(LoadableResource):
-    _allowed_attributes = ['name']
+    attribute_names = ['name']
 
 
 class TestRelatedListResource(Resource):
-    _allowed_attributes = ['name']
+    attribute_names = ['name']
 
 
 class TestHasRelatedResources(RelatedResourceMixin, LoadableResource):
@@ -64,28 +64,31 @@ class TestHasRelatedResources(RelatedResourceMixin, LoadableResource):
         'test-string': 'Company',
         'test-loadable': TestRelatedLoadableResource,
     }
-    _allowed_attributes = ['name']
+    attribute_names = ['name']
 
 
 class TestClient(Client):
-    base_url = 'http://duedil.com/api'
+    base_url = 'http://duedil.io/v3'
 
 
 class ResourceTestCase(unittest.TestCase):
 
+    client = TestClient(API_KEY)
+
     def test_resource_no_allowed_attributes(self):
         with self.assertRaises(NotImplementedError):
-            TestResource()
+            TestResource(self.client)
 
     def test_resource_set_attribute(self):
-        res = TestAttrResource(name="Duedil")
+        res = TestAttrResource(self.client, name="Duedil")
 
+        self.assertIsNone(res.id)
         self.assertEqual(res.name, 'Duedil')
-        self.assertFalse(hasattr(res, 'id'))
+        self.assertFalse(hasattr(res, 'category'))
 
         res._set_attributes(True, name="Limited")
-        self.assertTrue(hasattr(res, 'id'))
-        self.assertIsNone(res.id)
+        self.assertTrue(hasattr(res, 'category'))
+        self.assertIsNone(res.category)
 
 
 class LoadableResourceTestCase(unittest.TestCase):
@@ -94,7 +97,7 @@ class LoadableResourceTestCase(unittest.TestCase):
 
     @requests_mock.mock()
     def test_load_on_get(self, m):
-        m.register_uri('GET', 'http://duedil.com/api/resources/12345.json',
+        m.register_uri('GET', 'http://duedil.io/v3/resources/12345.json',
                        json={'response': {'name': 'Duedil', 'id': 12345}})
 
         res = TestLoadableResource(self.client, id=12345)
@@ -111,7 +114,7 @@ class RelatedResourceTestCase(unittest.TestCase):
     @requests_mock.mock()
     def test_load_related(self, m):
         m.register_uri(
-            'GET', 'http://duedil.com/api/test/12345/test-related.json',
+            'GET', 'http://duedil.io/v3/test/12345/test-related.json',
             json={'response': {
                 'name': 'Duedil'
             }})
@@ -122,7 +125,7 @@ class RelatedResourceTestCase(unittest.TestCase):
     @requests_mock.mock()
     def test_load_related_string(self, m):
         m.register_uri(
-            'GET', 'http://duedil.com/api/test/12345/test-string.json',
+            'GET', 'http://duedil.io/v3/test/12345/test-string.json',
             json={'response': {
                 'name': 'Duedil'
             }})
@@ -133,7 +136,7 @@ class RelatedResourceTestCase(unittest.TestCase):
     @requests_mock.mock()
     def test_load_related_loadable(self, m):
         m.register_uri(
-            'GET', 'http://duedil.com/api/test/12345/test-loadable.json',
+            'GET', 'http://duedil.io/v3/test/12345/test-loadable.json',
             json={'response': {
                 'name': 'Duedil'
             }})
@@ -146,7 +149,7 @@ class RelatedResourceTestCase(unittest.TestCase):
     def test_load_related_list(self, m):
         m.register_uri(
             'GET',
-            'http://duedil.com/api/test/12345/test-related-list.json',
+            'http://duedil.io/v3/test/12345/test-related-list.json',
             json={'response': {'data': [{
                 'name': 'Duedil'
             }]}})
@@ -158,7 +161,7 @@ class RelatedResourceTestCase(unittest.TestCase):
 
 class LiteCompanyTestCase(unittest.TestCase):
 
-    client = TestClient(API_KEY)
+    client = TestClient(API_KEY, api_type='lite')
 
     def test_company_number(self):
         company = LiteCompany(self.client, company_number=12345)
@@ -166,9 +169,9 @@ class LiteCompanyTestCase(unittest.TestCase):
 
     @requests_mock.mock()
     def test_load_company_number(self, m):
-        m.register_uri('GET', 'http://duedil.com/api/company/12345.json',
+        m.register_uri('GET', 'http://api.duedil.com/open/uk/company/12345.json',
                        json={'name': 'Duedil',
-                             'company_number': 12345})
+                             'company_number': "12345"})
 
         company = LiteCompany(self.client, company_number=12345)
         self.assertEqual(company.name, 'Duedil')

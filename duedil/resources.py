@@ -31,13 +31,15 @@ class Resource(object):
     id = None
     path = None
 
-    def __init__(self, id=None, locale=None, load=False, **kwargs):
+    def __init__(self, client, id=None, locale='uk', load=False, **kwargs):
         if not self.attribute_names:
             raise NotImplementedError(
                 "Resources must include a list of allowed attributes")
 
         self.id = id
-        self.locale = locale if locale else None
+        assert(locale in ['uk', 'roi'])
+        self.locale = locale
+        self.client = client
 
         if load:
             self.load()
@@ -56,8 +58,21 @@ class Resource(object):
                     self.__setattr__(allowed, None)
 
     def load(self):
-        result = api_client.get(self.endpoint)
+        result = self.client.get(self.endpoint)
         self._set_attributes(**result)
+
+    def __getattr__(self, name):
+        """
+        lazily return attributes, only contact duedil if necessary
+        """
+        try:
+            return super(Resource, self).__getattribute__(name)
+        except AttributeError:
+            if name in self.attribute_names:
+                self.load()
+                return super(Resource, self).__getattribute__(name)
+            else:
+                raise
 
     @property
     def endpoint(self):
@@ -75,26 +90,26 @@ class Resource(object):
 class LoadableResource(Resource):
     _endpoint = None
 
-    def __init__(self, client, id=None, locale='uk',
-                 **kwargs):
-        super(LoadableResource, self).__init__(**kwargs)
-        self.id = id
-        assert(locale in ['uk', 'roi'])
-        self.locale = locale
-        self.client = client
+    # def __init__(self, client, id=None, locale='uk',
+    #              **kwargs):
+    #     super(LoadableResource, self).__init__(**kwargs)
+    #     self.id = id
+    #     assert(locale in ['uk', 'roi'])
+    #     self.locale = locale
+    #     self.client = client
 
-    def __getattribute__(self, name):
-        """
-        lazily return attributes, only contact duedil if necessary
-        """
-        try:
-            return super(LoadableResource, self).__getattribute__(name)
-        except AttributeError:
-            if name in self._allowed_attributes:
-                self.load()
-                return super(LoadableResource, self).__getattribute__(name)
-            else:
-                raise
+    # def __getattr__(self, name):
+    #     """
+    #     lazily return attributes, only contact duedil if necessary
+    #     """
+    #     try:
+    #         return super(LoadableResource, self).__getattribute__(name)
+    #     except AttributeError:
+    #         if name in self.attribute_names:
+    #             self.load()
+    #             return super(LoadableResource, self).__getattribute__(name)
+    #         else:
+    #             raise
 
     def _assign_attributes(self, data=None):
         assert(data['response'].get('id') == self.id)
@@ -219,7 +234,7 @@ class RelatedResourceMixin(six.with_metaclass(RelatedResourceMeta, object)):
     def _get(self, resource):
         uri = '{endpoint}/{resource}'.format(endpoint=self.endpoint,
                                              resource=resource)
-        return api_client.get(uri)
+        return self.client.get(uri)
 
     def load_related(self, key, klass=None):
         internal_key = '_' + key.replace('-', '_')
@@ -239,11 +254,11 @@ class RelatedResourceMixin(six.with_metaclass(RelatedResourceMeta, object)):
                     for r in result['response']['data']:
                         r['locale'] = r.get('locale', self.locale)
                         related.append(
-                            klass(**r) if klass else None
+                            klass(self.client, **r) if klass else None
                         )
                 elif result:
                     response['locale'] = response.get('locale', self.locale)
                     if klass:
-                        related = klass(**response)
+                        related = klass(self.client, **response)
                 setattr(self, internal_key, related)
         return related

@@ -38,8 +38,9 @@ class Client(object):
         self.api_key = api_key
         self.cache = cache
         self.sandbox = sandbox
+        self.set_api(api_type)
 
-    def set_api(self, api_type, api_key):
+    def set_api(self, api_type, api_key=None):
         if api_type not in ('pro', 'lite', 'international'):
             raise ValueError(
                 'Duedil API must be "pro", "lite", and "international"')
@@ -51,7 +52,11 @@ class Client(object):
         elif api_type == 'international':
             self.base_url = API_INTERNATIONAL_URL
 
-        self.api_key = api_key
+        if self.sandbox:
+            self.base_url = self.base_url + '/sandbox'
+
+        if api_key:
+            self.api_key = api_key
 
     def get(self, endpoint, data=None):
 
@@ -63,8 +68,6 @@ class Client(object):
         data = data or {}
 
         url = "{base_url}/{endpoint}.json"
-        if self.sandbox:
-            url = "sandbox/" + url
         prepared_url = url.format(base_url=self.base_url,
                                   endpoint=endpoint)
 
@@ -75,7 +78,6 @@ class Client(object):
 
             params = data.copy()
             params['api_key'] = self.api_key
-
             response = requests.get(prepared_url, params=params)
             try:
                 if not response.raise_for_status():

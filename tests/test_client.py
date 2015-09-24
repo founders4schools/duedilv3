@@ -32,21 +32,21 @@ API_KEY = '12345'
 
 
 class TestClient(Client):
-    base_url = 'http://api.duedil.com/test'
+    base_url = 'http://duedil.io/v3'
 
 
 class ClientTestCase(unittest.TestCase):
 
-    def test_no_base_url(self):
-        with self.assertRaises(NotImplementedError):
-            Client(API_KEY)
+    def test_no_api_type(self):
+        with self.assertRaises(ValueError):
+            Client(API_KEY, api_type=None)
 
     @requests_mock.mock()
     def test_get(self, m):
 
         client = TestClient(API_KEY)
         m.register_uri('GET',
-                       ('http://api.duedil.com/test/12345.json?api_key=' +
+                       ('http://duedil.io/v3/12345.json?api_key=' +
                         API_KEY),
                        json={'name': 'Duedil', 'id': '12345'})
 
@@ -58,7 +58,7 @@ class ClientTestCase(unittest.TestCase):
     def test_cached_get(self, m):
         cache = Cache()
         client = TestClient(API_KEY, cache=cache)
-        url = 'http://api.duedil.com/test/12345.json'
+        url = 'http://duedil.io/v3/12345.json'
         m.register_uri('GET', (url + '?api_key=' + API_KEY),
                        json={'name': 'Duedil', 'id': '12345'})
 
@@ -72,19 +72,19 @@ class ClientTestCase(unittest.TestCase):
         cache = Cache()
         client = TestClient(API_KEY, cache=cache)
         params = {'filters': {'name': 'Duedil Ltd'}}
-        url = 'http://api.duedil.com/test/12345.json'
+        url = 'http://duedil.io/v3/12345.json'
         m.register_uri('GET', url, json={'name': 'Duedil', 'id': '12345'})
 
         client.get('12345', data=params)
 
-        cached = cache.get_url('http://api.duedil.com/test/12345.json',
+        cached = cache.get_url('http://duedil.io/v3/12345.json',
                                url_params=params)
         self.assertEqual(cached, {'name': 'Duedil', 'id': '12345'})
 
     @requests_mock.mock()
     def test_404(self, m):
         client = TestClient(API_KEY)
-        url = 'http://api.duedil.com/test/12345.json'
+        url = 'http://duedil.io/v3/12345.json'
         m.register_uri('GET', (url + '?api_key=' + API_KEY),
                        status_code=404, reason="Not Found")
 
@@ -94,7 +94,7 @@ class ClientTestCase(unittest.TestCase):
     @requests_mock.mock()
     def test_other_http_error(self, m):
         client = TestClient(API_KEY)
-        url = 'http://api.duedil.com/test/12345.json'
+        url = 'http://duedil.io/v3/12345.json'
         m.register_uri('GET', (url + '?api_key=' + API_KEY),
                        status_code=403, reason="Forbidden")
 
@@ -128,10 +128,10 @@ class ProClientTestCase(unittest.TestCase):
     client = Client(API_KEY)
 
     def test_sandbox(self):
-        self.assertEqual(self.client.base_url, 'http://duedil.io/v3/uk')
+        self.assertEqual(self.client.base_url, 'http://duedil.io/v3')
         sandbox_client = Client(API_KEY, sandbox=True)
         self.assertEqual(sandbox_client.base_url,
-                         'http://duedil.io/v3/sandbox/uk')
+                         'http://duedil.io/v3/sandbox')
 
     @requests_mock.mock()
     def test_search_company(self, m):
@@ -227,10 +227,10 @@ class SearchQueryTestCase(unittest.TestCase):
 
 class I12ClientTestCase(unittest.TestCase):
 
-    client = Client(API_KEY, api_type='international')
 
     def test_sandbox(self):
-        self.assertEqual(self.client.base_url,
+        client = Client(API_KEY, api_type='international')
+        self.assertEqual(client.base_url,
                          'http://api.duedil.com/international')
         sandbox_client = Client(API_KEY, sandbox=True, api_type='international')
         self.assertEqual(sandbox_client.base_url,

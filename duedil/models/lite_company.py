@@ -6,7 +6,7 @@ from ..resources import Resource, SearchableResourceMeta
 
 
 class LiteCompany(six.with_metaclass(SearchableResourceMeta, Resource)):
-    path = 'companies'
+    path = 'company'
     search_path = 'search'
     attribute_names = [
         'duedil_url',
@@ -40,5 +40,4 @@ class LiteCompany(six.with_metaclass(SearchableResourceMeta, Resource)):
     ]
 
     def __init__(self, client, company_number=None, **kwargs):
-        super(LiteCompany, self).__init__(client, id=company_number,
-                                          **kwargs)
+        super(LiteCompany, self).__init__(client, id=company_number, **kwargs)
