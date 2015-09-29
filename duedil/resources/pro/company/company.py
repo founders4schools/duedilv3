@@ -239,19 +239,19 @@ class Company(RelatedResourceMixin,
     ]
 
     related_resources = {
-        'service-addresses': 'ServiceAddress',
-        'registered-address': 'RegisteredAddress',
-        'directors': 'Director',
-        'parent': 'Company',
-        'directors': 'Director',
-        'directorships': 'DirectorShip',
-        'accounts': 'Account',
-        'previous-company-names': 'PreviousCompanyName',
-        'industries': 'Industry',
-        'shareholders': 'Shareholder',
-        'bank-accounts': 'BankAccount',
-        'mortgages': 'Mortgage',
-        'subsidiaries': 'Company',
+        'service-addresses': 'resources.pro.company.ServiceAddress',
+        'registered-address': 'resources.pro.company.RegisteredAddress',
+        'directors': 'resources.pro.company.Director',
+        'parent': 'resources.pro.company.Company',
+        'directors': 'resources.pro.company.Director',
+        'directorships': 'resources.pro.company.DirectorShip',
+        'accounts': 'resources.pro.company.Account',
+        'previous-company-names': 'resources.pro.company.PreviousCompanyName',
+        'industries': 'resources.pro.company.Industry',
+        'shareholders': 'resources.pro.company.Shareholder',
+        'bank-accounts': 'resources.pro.company.BankAccount',
+        'mortgages': 'resources.pro.company.Mortgage',
+        'subsidiaries': 'resources.pro.company.Company',
     }
 
     range_filters = [

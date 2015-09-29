@@ -25,7 +25,7 @@ import requests_mock
 # from requests.exceptions import HTTPError
 
 from duedil.resources import Resource, LoadableResource, RelatedResourceMixin
-from duedil.resources.pro import Company
+from duedil.resources.pro.company import Company
 from duedil.resources.lite import Company as LiteCompany
 from duedil.api import ProClient, LiteClient
 
@@ -62,11 +62,11 @@ class TestHasRelatedResources(RelatedResourceMixin, LoadableResource):
     related_resources = {
         'test-related': TestRelatedResource,
         'test-related-list': TestRelatedListResource,
-        'test-string': 'Company',
+        'test-string': 'resources.pro.company.Company',
         'test-loadable': TestRelatedLoadableResource,
     }
     attribute_names = ['name']
-    
+
 
 class ResourceTestCase(unittest.TestCase):
 
@@ -167,7 +167,7 @@ class LiteCompanyTestCase(unittest.TestCase):
 
     @requests_mock.mock()
     def test_load_company_number(self, m):
-        m.register_uri('GET', 'http://api.duedil.com/open/uk/company/12345',
+        m.register_uri('GET', 'http://api.duedil.com/open/uk/company/12345.json',
                        json={'name': 'Duedil',
                              'company_number': "12345"})
 

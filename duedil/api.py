@@ -261,7 +261,7 @@ class ProClient(Client):
                             **kwargs)
 
     def search(self, order_by=None, limit=None, offset=None, **kwargs):
-        return self.search_company(order_by, limit, offset, **kwargs) +
+        return self.search_company(order_by, limit, offset, **kwargs) + \
                self.search_director(order_by, limit, offset, **kwargs)
 
 

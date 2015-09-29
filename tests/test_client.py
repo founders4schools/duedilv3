@@ -111,7 +111,7 @@ class LiteClientTestCase(unittest.TestCase):
     @requests_mock.mock()
     def test_search(self, m):
         client = LiteClient(API_KEY)
-        url = 'http://api.duedil.com/open/search'
+        url = 'http://api.duedil.com/open/search.json'
         result = {
             'locale': 'uk',
             'url': 'http://api.duedil.com/open/uk/company/06999618',

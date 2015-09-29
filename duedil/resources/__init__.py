@@ -201,6 +201,7 @@ class SearchableResourceMeta(type):
             )
         return results
 
+from importlib import import_module
 
 class RelatedResourceMeta(type):
 
@@ -214,7 +215,10 @@ class RelatedResourceMeta(type):
                 resource = self.related_resources[endpoint]
 
                 if isinstance(resource, six.string_types):
-                    resource = getattr(sys.modules[__name__], resource)
+                    print resource
+                    module, resource = resource.rsplit('.', 1)
+                    print sys.modules['duedil.%s' % module].__dict__
+                    resource = getattr(sys.modules['duedil.%s' % module], resource)
 
                 return self.load_related(endpoint, resource)
 
