@@ -217,8 +217,8 @@ class ProClient(Client):
         Apply any combination of 44 different filters
 
         The parameter filters supports two different types of queries:
-            * the “range” type (ie, a numeric range) and
-            * the “terms” type (for example, an individual company name).
+            * the "range" type (ie, a numeric range) and
+            * the "terms" type (for example, an individual company name).
 
         For the range filter, you have to pass an array;
         for the terms filter, you just pass a string.
@@ -240,8 +240,8 @@ class ProClient(Client):
 
     def search_director(self, order_by=None, limit=None, offset=None, **kwargs):
         '''
-        This “Director search endpoint” is similar to the
-        “Company search endpoint”, though with some different ranges and
+        This "Director search endpoint" is similar to the
+        "Company search endpoint", though with some different ranges and
         terms.
 
         Searching by financial range will return directors who have a
@@ -272,8 +272,8 @@ class InternationalClient(Client):
 
     def get(self, country_code, endpoint, data):
         endpoint = '{}/{}'.format(country_code, endpoint)
-        self._get(endpoint, data)
+        return self._get(endpoint, data)
 
     # this should be a Resource and not here...
     def report(self, country_code, id):
-        return self.get(country_code, 'report', id)
+        return self.get(country_code, 'report/{}'.format(id), {})

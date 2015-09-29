@@ -20,6 +20,7 @@
 import unittest
 
 import json
+import re
 
 import requests_mock
 from requests.exceptions import HTTPError
@@ -43,6 +44,10 @@ class ClientTestCase(unittest.TestCase):
     def test_no_api_type(self):
         with self.assertRaises(ValueError):
             Client(API_KEY)
+
+    def test_no_api_key(self):
+        with self.assertRaises(ValueError):
+            Client()
 
     @requests_mock.mock()
     def test_get(self, m):
@@ -170,7 +175,30 @@ class ProClientTestCase(unittest.TestCase):
         for director in directors:
             self.assertIsInstance(director, DirectorSearchResult)
 
-
+    @requests_mock.mock()
+    def test_search(self, m):
+        result = {
+            'url': 'http://duedil.io/v3/uk/directors/06999618',
+            'id': '12345',
+            'forename': 'John',
+            'surname': 'Doe'
+        }
+        url = 'http://duedil.io/v3/directors.json'
+        m.register_uri('GET', url,
+                       json={'response': {'data': [result]}})
+        result = {
+            'locale': 'uk',
+            'url': 'http://duedil.io/v3/uk/companies/06999618.json',
+            'id': '06999618',
+            'name': 'Duedil Limited'
+        }
+        url = 'http://duedil.io/v3/companies.json'
+        m.register_uri('GET', url,
+                       json={'response': {'data': [result]}})
+        results = self.client.search()
+        self.assertEqual(len(results), 2)
+        self.assertIn('api_key=12345', m._adapter.last_request.query)
+        self.assertIsInstance(results, list)
 
 
 class SearchQueryTestCase(unittest.TestCase):
@@ -230,14 +258,24 @@ class SearchQueryTestCase(unittest.TestCase):
 
 class I12ClientTestCase(unittest.TestCase):
 
+    client = InternationalClient(API_KEY)
 
     def test_sandbox(self):
-        client = InternationalClient(API_KEY)
-        self.assertEqual(client.base_url,
+        self.assertEqual(self.client.base_url,
                          'http://api.duedil.com/international')
         sandbox_client = InternationalClient(API_KEY, sandbox=True)
         self.assertEqual(sandbox_client.base_url,
                          'http://api.duedil.com/international/sandbox')
+
+    @requests_mock.mock()
+    def test_report(self, m):
+        m.register_uri('GET', 'http://api.duedil.com/international/uk/report/54321', json={})
+        self.assertEqual(self.client.report('uk', 54321), {})
+
+    @requests_mock.mock()
+    def test_search(self, m):
+        m.register_uri('GET', 'http://api.duedil.com/international/uk/search?q=Acme', json={})
+        self.assertEqual(self.client.search('uk', 'Acme'), [])
 
 
 def test_suite():
