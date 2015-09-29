@@ -22,6 +22,7 @@ from __future__ import unicode_literals
 from .apiconst import COMPANY_TERM_FILTERS, COMPANY_RANGE_FILTERS, DIRECTOR_TERM_FILTERS, DIRECTOR_RANGE_FILTERS
 from .search.pro import CompanySearchResult as ProCompanySearchResult, DirectorSearchResult
 from .search.lite import CompanySearchResult as LiteCompanySearchResult
+from .search.international import CompanySearchResult as InternationalCompanySearchResult
 
 import os
 import json
@@ -64,10 +65,11 @@ class Client(object):
             raise ValueError("Please provide a valid Duedil API key")
         self.api_key = api_key
 
-        # if api_type not in API_URLS.keys():
-        #     raise ValueError('Duedil API type must be "{}"'.format('", "'.join(API_URLS.keys())))
-        # self.api_type = api_type
-        self.base_url = API_URLS.get(self.api_type, 'lite')
+        try:
+            self.base_url = API_URLS.get(self.api_type, 'lite')
+        except AttributeError:
+            raise ValueError('Duedil API type must be "{}"'.format('", "'.join(API_URLS.keys())))
+
 
         # Are we in a sandbox?
         self.sandbox = sandbox
@@ -81,10 +83,17 @@ class Client(object):
         'this should become the private interface to all reequests to the api'
 
         result = None
-        resp_format = 'json'
         data = data or {}
 
-        url = "{base_url}/{endpoint}.{format}"
+        if self.api_type == "pro":
+            data_format = 'json'
+            resp_format = '.{}'.format(data_format)
+        else:
+            resp_format = ''
+
+
+
+        url = "{base_url}/{endpoint}{format}"
         prepared_url = url.format(base_url=self.base_url,
                                   endpoint=endpoint,
                                   format=resp_format)
@@ -117,7 +126,7 @@ class Client(object):
     def _build_search_string(self, *args, **kwargs):
         raise NotImplementedError
 
-    def search(self, *args, **kwargs):
+    def search(self, query):
         raise NotImplementedError
 
 
@@ -125,11 +134,11 @@ class LiteClient(Client):
     api_type = 'lite'
 
     def _build_search_string(self, *args, **kwargs):
-        pass
 
-    def search(self, *args, **kwargs):
+
+    def search(self, query):
         #  this will need to be alter in all likely hood to do some validation
-        return self._search('search', LiteCompanySearchResult, *args, **kwargs)
+        return self._search('search', LiteCompanySearchResult, query=query)
 
 
 class ProClient(Client):
@@ -143,30 +152,59 @@ class ProClient(Client):
             try:
                 assert(arg in term_filters + range_filters), "Not a valid query parameter"
             except AssertionError:
-                raise TypeError
+                raise TypeError('%s must be one of %s' % (arg, ', '.join(term_filters+range_filters)))
             if arg in term_filters:
                 # this must be  a string
-                assert(isinstance(value, basestring))
+                try:
+                    assert(isinstance(value, basestring))
+                except AssertionError:
+                    raise TypeError('%s must be string type' % arg)
             elif arg in range_filters:
                 # array of two numbers
-                assert(isinstance(value, (list, tuple)))
-                assert(len(value) == 2)
+                try:
+                    assert(isinstance(value, (list, tuple)))
+                except AssertionError:
+                    raise TypeError('%s must be an array' % arg)
+                try:
+                    assert(len(value) == 2)
+                except AssertionError:
+                    raise ValueError('Argument %s can only be an array of length 2' % arg)
                 for v in value:
-                    assert(isinstance(v, (int, long, float)))
+                    try:
+                        assert(isinstance(v, (int, long, float)))
+                    except AssertionError:
+                        raise TypeError('Value of %s must be numeric' % arg)
         data['filters'] = json.dumps(kwargs)
         if order_by:
-            assert(isinstance(order_by, dict))
-            assert('field' in order_by)
-            assert(
-                order_by['field'] in term_filters + range_filters)
+            try:
+                assert(isinstance(order_by, dict))
+            except:
+                raise TypeError('order_by must be dictionary')
+            try:
+                assert('field' in order_by)
+            except AssertionError:
+                raise ValueError("'field' must be a key in the order_by dictionary")
+            try:
+                assert(order_by['field'] in term_filters + range_filters)
+            except AssertionError:
+                raise TypeError("order_by['field'] must be one of %s" % (', '.join(term_filters+range_filters)))
             if order_by.get('direction'):
-                assert(order_by['direction'] in ['asc', 'desc'])
+                try:
+                    assert(order_by['direction'] in ['asc', 'desc'])
+                except AssertionError:
+                    raise ValueError('The direction must either be "asc" or "desc"')
             data['orderBy'] = json.dumps(order_by)
         if limit:
-            assert(isinstance(limit, int))
+            try:
+                assert(isinstance(limit, int))
+            except AssertionError:
+                raise TypeError('limit must be an integer')
             data['limit'] = limit
         if offset:
-            assert(isinstance(offset, int))
+            try:
+                assert(isinstance(offset, int))
+            except AssertionError:
+                raise TypeError('offset must be an integer')
             data['offset'] = offset
         return data
 
@@ -224,3 +262,11 @@ class InternationalClient(Client):
 
     def _build_search_string(self, *args, **kwargs):
         pass
+
+    def search(self, *args, **kwargs):
+        try:
+            endpoint = '{}/search'.format(arg[0])
+        except IndexError:
+            # more validation could be done at this point
+            raise TypeError('First argument must be the ISO 3166 country code of a supported country')
+        return self._search(endpoint, InternationalCompanySearchResult, *args, **kwargs)

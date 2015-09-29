@@ -27,7 +27,7 @@ import requests_mock
 from duedil.resources import Resource, LoadableResource, RelatedResourceMixin
 from duedil.resources.pro import Company
 from duedil.resources.lite import Company as LiteCompany
-from duedil.api import Client
+from duedil.api import ProClient, LiteClient
 
 API_KEY = '12345'
 
@@ -66,15 +66,11 @@ class TestHasRelatedResources(RelatedResourceMixin, LoadableResource):
         'test-loadable': TestRelatedLoadableResource,
     }
     attribute_names = ['name']
-
-
-class TestClient(Client):
-    base_url = 'http://duedil.io/v3'
-
+    
 
 class ResourceTestCase(unittest.TestCase):
 
-    client = TestClient(API_KEY)
+    client = ProClient(API_KEY)
 
     def test_resource_no_allowed_attributes(self):
         with self.assertRaises(NotImplementedError):
@@ -94,7 +90,8 @@ class ResourceTestCase(unittest.TestCase):
 
 class LoadableResourceTestCase(unittest.TestCase):
 
-    client = TestClient(API_KEY)
+    client = ProClient(API_KEY)
+
 
     @requests_mock.mock()
     def test_load_on_get(self, m):
@@ -110,7 +107,7 @@ class LoadableResourceTestCase(unittest.TestCase):
 
 class RelatedResourceTestCase(unittest.TestCase):
 
-    client = TestClient(API_KEY)
+    client = ProClient(API_KEY)
 
     @requests_mock.mock()
     def test_load_related(self, m):
@@ -162,7 +159,7 @@ class RelatedResourceTestCase(unittest.TestCase):
 
 class LiteCompanyTestCase(unittest.TestCase):
 
-    client = TestClient(API_KEY, api_type='lite')
+    client = LiteClient(API_KEY)
 
     def test_company_number(self):
         company = LiteCompany(self.client, company_number=12345)
@@ -170,7 +167,7 @@ class LiteCompanyTestCase(unittest.TestCase):
 
     @requests_mock.mock()
     def test_load_company_number(self, m):
-        m.register_uri('GET', 'http://api.duedil.com/open/uk/company/12345.json',
+        m.register_uri('GET', 'http://api.duedil.com/open/uk/company/12345',
                        json={'name': 'Duedil',
                              'company_number': "12345"})
 

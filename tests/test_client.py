@@ -27,12 +27,14 @@ from requests.exceptions import HTTPError
 from duedil.api import LiteClient, ProClient, InternationalClient, Client
 from duedil.cache import Cache
 from duedil.resources.lite import Company as LiteCompany
-from duedil.search.pro import CompanySearchResult, DirectorSearchResult
+from duedil.search.pro import CompanySearchResult as ProCompanySearchResult, DirectorSearchResult
+from duedil.search.lite import CompanySearchResult as LiteCompanySearchResult
 
 API_KEY = '12345'
 
 
 class TestClient(Client):
+    api_type = 'pro'
     base_url = 'http://duedil.io/v3'
 
 
@@ -40,7 +42,7 @@ class ClientTestCase(unittest.TestCase):
 
     def test_no_api_type(self):
         with self.assertRaises(ValueError):
-            Client(API_KEY, api_type=None)
+            Client(API_KEY)
 
     @requests_mock.mock()
     def test_get(self, m):
@@ -121,7 +123,7 @@ class LiteClientTestCase(unittest.TestCase):
 
         companies = client.search('DueDil')
         for company in companies:
-            self.assertIsInstance(company, LiteCompany)
+            self.assertIsInstance(company, LiteCompanySearchResult)
 
 
 class ProClientTestCase(unittest.TestCase):
@@ -149,7 +151,7 @@ class ProClientTestCase(unittest.TestCase):
         self.assertEqual(len(companies), 1)
         self.assertIn('api_key=12345', m._adapter.last_request.query)
         for company in companies:
-            self.assertIsInstance(company, CompanySearchResult)
+            self.assertIsInstance(company, ProCompanySearchResult)
 
     @requests_mock.mock()
     def test_search_director(self, m):
