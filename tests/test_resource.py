@@ -25,7 +25,8 @@ import requests_mock
 # from requests.exceptions import HTTPError
 
 from duedil.resources import Resource, LoadableResource, RelatedResourceMixin
-from duedil.models import LiteCompany, Company
+from duedil.resources.pro import Company
+from duedil.resources.lite import Company as LiteCompany
 from duedil.api import Client
 
 API_KEY = '12345'
