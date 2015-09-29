@@ -24,6 +24,8 @@ from .search.pro import CompanySearchResult as ProCompanySearchResult, DirectorS
 from .search.lite import CompanySearchResult as LiteCompanySearchResult
 from .search.international import CompanySearchResult as InternationalCompanySearchResult
 
+from .resources.lite import Company as LiteCompany
+
 import os
 import json
 
@@ -85,7 +87,7 @@ class Client(object):
         result = None
         data = data or {}
 
-        if self.api_type == "pro":
+        if self.api_type in ["pro", "lite"]:
             data_format = 'json'
             resp_format = '.{}'.format(data_format)
         else:
@@ -124,7 +126,12 @@ class Client(object):
         return [result_klass(self, **r) for r in results.get('response',{}).get('data', {})]
 
     def _build_search_string(self, *args, **kwargs):
-        raise NotImplementedError
+        data = {}
+        try:
+            data['q'] = kwargs['query']
+        except KeyError:
+            raise ValueError('query key must be present as a kwarg')
+        return data
 
     def search(self, query):
         raise NotImplementedError
@@ -132,9 +139,6 @@ class Client(object):
 
 class LiteClient(Client):
     api_type = 'lite'
-
-    def _build_search_string(self, *args, **kwargs):
-
 
     def search(self, query):
         #  this will need to be alter in all likely hood to do some validation
@@ -152,7 +156,7 @@ class ProClient(Client):
             try:
                 assert(arg in term_filters + range_filters), "Not a valid query parameter"
             except AssertionError:
-                raise TypeError('%s must be one of %s' % (arg, ', '.join(term_filters+range_filters)))
+                raise TypeError('%s does not match %s' % (arg, ', '.join(term_filters+range_filters)))
             if arg in term_filters:
                 # this must be  a string
                 try:
@@ -256,17 +260,22 @@ class ProClient(Client):
                             offset=offset,
                             **kwargs)
 
+    def search(self, order_by=None, limit=None, offset=None, **kwargs):
+        return self.search_company(order_by, limit, offset, **kwargs) +
+               self.search_director(order_by, limit, offset, **kwargs)
+
 
 class InternationalClient(Client):
     api_type = 'international'
 
-    def _build_search_string(self, *args, **kwargs):
-        pass
+    def search(self, country_code, query):
+        endpoint = '{}/search'.format(country_code)
+        return self._search(endpoint, InternationalCompanySearchResult, query=query)
 
-    def search(self, *args, **kwargs):
-        try:
-            endpoint = '{}/search'.format(arg[0])
-        except IndexError:
-            # more validation could be done at this point
-            raise TypeError('First argument must be the ISO 3166 country code of a supported country')
-        return self._search(endpoint, InternationalCompanySearchResult, *args, **kwargs)
+    def get(self, country_code, endpoint, data):
+        endpoint = '{}/{}'.format(country_code, endpoint)
+        self._get(endpoint, data)
+
+    # this should be a Resource and not here...
+    def report(self, country_code, id):
+        return self.get(country_code, 'report', id)
