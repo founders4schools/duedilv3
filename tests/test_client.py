@@ -110,6 +110,13 @@ class ClientTestCase(unittest.TestCase):
             response = client.get('12345')
             self.assertIsNone(response)
 
+    def test_incorrect_query_params(self):
+        with self.assertRaises(ValueError):
+            TestClient(API_KEY)._build_search_string(q='searchthing')
+
+    def test_base_search(self):
+        with self.assertRaises(NotImplementedError):
+            TestClient(API_KEY).search('searchthing')
 
 class LiteClientTestCase(unittest.TestCase):
 
