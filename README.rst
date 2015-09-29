@@ -1,12 +1,12 @@
 DueDil API v3 |pypi| |build-status| |coverage-status| |waffle| |docs|
 =====================================================================
 
-This is a Python implementation of the `DueDil v3 API`_, see the generated 
+This is a Python implementation of the `DueDil v3 API`_, see the generated
 `documentation <http://duedilv3.readthedocs.org/en/latest/>`_ for more information.
 
-.. |build-status| image:: https://travis-ci.org/founders4schools/duedilv3.svg?branch=master
+.. |build-status| .. image:: https://travis-ci.org/founders4schools/duedilv3.svg?branch=future
     :target: https://travis-ci.org/founders4schools/duedilv3
-    :alt: Tests
+    :alt: Build
 .. |coverage-status| image:: https://coveralls.io/repos/founders4schools/duedilv3/badge.png
     :target: https://coveralls.io/r/founders4schools/duedilv3
     :alt: Coverage
