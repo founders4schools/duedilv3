@@ -38,6 +38,7 @@ class TestResource(Resource):
 
 class TestAttrResource(Resource):
     attribute_names = ['name', 'id', 'category']
+    path = 'test'
 
 
 class TestLoadableResource(LoadableResource):
@@ -76,7 +77,10 @@ class ResourceTestCase(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             TestResource(self.client)
 
-    def test_resource_set_attribute(self):
+    @requests_mock.mock()
+    def test_resource_set_attribute(self, m):
+        m.register_uri('GET', 'http://duedil.io/v3/uk/test.json',
+                       json={'response': {'name': 'Duedil', 'id': 12345, 'category': None}})
         res = TestAttrResource(self.client, name="Duedil")
 
         self.assertIsNone(res.id)

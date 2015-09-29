@@ -141,58 +141,16 @@ def resource_property(endpoint):
     return wrap
 
 
-def _build_search_string(self, term_filters, range_filters,
-                         order_by=None, limit=None, offset=None,
-                         **kwargs):
-    data = {}
-
-    for arg in kwargs:
-        if arg in term_filters:
-            # this must be a string
-            assert(isinstance(kwargs[arg], six.string_types))
-        elif arg in range_filters:
-            # array of two numbers
-            assert(isinstance(kwargs[arg], (list, tuple)))
-            assert(len(kwargs[arg]) == 2)
-            for v in kwargs[arg]:
-                assert(isinstance(v, (float, six.integer_types)))
-        else:
-            raise TypeError(
-                "{arg} is not available as a filter".format(arg=arg))
-
-    if kwargs:
-        data['filters'] = json.dumps(kwargs)
-
-    if order_by:
-        assert(isinstance(order_by, dict))
-        assert('field' in order_by)
-        assert(
-            order_by['field'] in term_filters + range_filters)
-        if order_by.get('direction'):
-            assert(order_by['direction'] in ['asc', 'desc'])
-        data['orderBy'] = json.dumps(order_by)
-
-    if limit:
-        assert(isinstance(limit, int))
-        data['limit'] = limit
-
-    if offset:
-        assert(isinstance(offset, int))
-        data['offset'] = offset
-
-    return data
-
-
 class SearchableResourceMeta(type):
     term_filters = None
     range_filters = None
     search_path = None
 
     def search(klass, order_by=None, limit=None, offset=None, **kwargs):
-        data = _build_search_string(klass.term_filters,
-                                    klass.range_filters,
-                                    order_by=order_by, limit=limit,
-                                    offset=offset, **kwargs)
+        data = klass.client._build_search_string(klass.term_filters,
+                                                 klass.range_filters,
+                                                 order_by=order_by, limit=limit,
+                                                 offset=offset, **kwargs)
         results_raw = klass.client.get(klass.search_path, data=data)
         results = []
         for r in results_raw['response']['data']:
@@ -223,7 +181,6 @@ class RelatedResourceMeta(type):
             attr_name = ep.replace('-', '_')
             setattr(klass, attr_name,
                     property(getter, None, None, attr_name))
-
 
 class SearchableRelatedResourceMeta(SearchableResourceMeta, RelatedResourceMeta):
     pass

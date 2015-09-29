@@ -153,10 +153,6 @@ class ProClient(Client):
                              **kwargs):
         data = {}
         for arg, value in kwargs.items():
-            try:
-                assert(arg in term_filters + range_filters), "Not a valid query parameter"
-            except AssertionError:
-                raise TypeError('%s does not match %s' % (arg, ', '.join(term_filters+range_filters)))
             if arg in term_filters:
                 # this must be  a string
                 try:
@@ -178,6 +174,8 @@ class ProClient(Client):
                         assert(isinstance(v, (int, long, float)))
                     except AssertionError:
                         raise TypeError('Value of %s must be numeric' % arg)
+            else:
+                raise TypeError('%s does not match %s' % (arg, ', '.join(term_filters+range_filters)))
         data['filters'] = json.dumps(kwargs)
         if order_by:
             try:
