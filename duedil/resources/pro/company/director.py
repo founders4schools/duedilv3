@@ -2,11 +2,10 @@ from __future__ import unicode_literals
 
 import six
 
-from ... import ProResource, RelatedResourceMixin, SearchableRelatedResourceMeta
+from ... import ProResource, RelatedResourceMixin
 
 
-class Director(RelatedResourceMixin,
-               six.with_metaclass(SearchableRelatedResourceMeta, ProResource)):
+class Director(RelatedResourceMixin, ProResource):
 
     path = 'directors'
 

@@ -7,8 +7,7 @@ from ... import (ProResource, RelatedResourceMixin,
                          SearchableRelatedResourceMeta)
 
 
-class Company(RelatedResourceMixin,
-              six.with_metaclass(SearchableRelatedResourceMeta, ProResource)):
+class Company(RelatedResourceMixin, ProResource):
 
     path = 'companies'
 

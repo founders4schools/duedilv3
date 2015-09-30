@@ -1,8 +1,8 @@
 
-from ...resources import Resource
+from .. import SearchResource
 
 
-class CompanySearchResult(Resource):
+class CompanySearchResult(SearchResource):
     attribute_names = [
         'registration_number'
         'name'

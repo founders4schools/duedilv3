@@ -19,11 +19,9 @@
 from __future__ import unicode_literals
 
 
-from .search.pro import CompanySearchResult as ProCompanySearchResult, DirectorSearchResult
 from .search.lite import CompanySearchResult as LiteCompanySearchResult
+from .search.pro import CompanySearchResult as ProCompanySearchResult, DirectorSearchResult
 from .search.international import CompanySearchResult as InternationalCompanySearchResult
-
-from .resources.lite import Company as LiteCompany
 
 import os
 import json
@@ -60,17 +58,16 @@ class Client(object):
         self.cache = cache
         self.set_api(api_key, sandbox)
 
-    def set_api(self, api_key, sandbox):
+    def set_api(self, api_key=None, sandbox=False):
 
-        if not api_key:
+        if not (api_key or API_KEY):
             raise ValueError("Please provide a valid Duedil API key")
-        self.api_key = api_key
+        self.api_key = api_key or API_KEY
 
         try:
             self.base_url = API_URLS.get(self.api_type, 'lite')
         except AttributeError:
             raise ValueError('Duedil API type must be "{}"'.format('", "'.join(API_URLS.keys())))
-
 
         # Are we in a sandbox?
         self.sandbox = sandbox
@@ -114,7 +111,7 @@ class Client(object):
                                            url_params=params)
             except HTTPError:
                 if response.status_code == 404:
-                    pass
+                    result = {}
                 else:
                     raise
         return result

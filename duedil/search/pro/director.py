@@ -1,8 +1,8 @@
 
-from ...resources import Resource
+from .. import SearchResource
 
 
-class DirectorSearchResult(Resource):
+class DirectorSearchResult(SearchResource):
     attribute_names = [
         'name',
         'locale',
