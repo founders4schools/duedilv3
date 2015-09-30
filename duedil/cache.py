@@ -17,6 +17,11 @@
 #
 #
 
+import hashlib
+import six
+
+from collections import OrderedDict
+
 
 class Cache(object):
     """
@@ -29,18 +34,25 @@ class Cache(object):
     _raw_dict = {}
 
     def __init__(self, raw_dict={}):
-        self._raw_dict = raw_dict
+        self._raw_dict = {}
 
-    def get_url(self, url):
+    def _cache_key(self, key, url_params):
+        cache_key = key
+        if url_params:
+            cache_key += six.text_type(OrderedDict(url_params))
+        return hashlib.md5(six.b(key)).hexdigest()
+
+    def get_url(self, url, url_params=None):
         """
         get the value in cache or None if URL doesn't match any
 
         :param url: The URL to query
         :return: the value in cache or None
         """
-        return self._raw_dict.get(url, None)
+        cache_key = self._cache_key(url, url_params)
+        return self._raw_dict.get(cache_key, None)
 
-    def set_url(self, url, data):
+    def set_url(self, url, data, url_params=None):
         """
         Store the data for given URL in cache, override any previously present value
 
@@ -48,4 +60,5 @@ class Cache(object):
         :param data: The value to store
         :return: Nothing
         """
-        self._raw_dict[url] = data
+        cache_key = self._cache_key(url, url_params)
+        self._raw_dict[cache_key] = data

@@ -25,7 +25,7 @@ class PyTest(test_command):
         sys.exit(errno)
 
 
-version = '0.3'
+version = '0.4'
 
 setup(name='duedil',
       version=version,
@@ -53,8 +53,10 @@ setup(name='duedil',
       zip_safe=False,
       install_requires=[
           # -*- Extra requirements: -*-
+          'requests>=2,<3',
+          'six==1.9.0'
       ],
-      tests_require=['pytest'],
+      tests_require=['pytest', 'requests_mock'],
       cmdclass = {'test': PyTest},
       entry_points="""
       # -*- Entry points: -*-
