@@ -3,6 +3,14 @@
 History
 =======
 
+0.4 (2015/09/30)
+----------------
+
+- Merged some changes from a fork, updated tests to match
+- Refactored the api clients, restructured the resources to include all API endpoints
+- Added Search resources
+
+
 0.3 (2015/02/27)
 ----------------
 
