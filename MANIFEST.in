@@ -1,0 +1,6 @@
+include *md
+include *rst
+include LICENCE.txt
+recursive-include duedil
+recursive-include docs
+recursive-include data
