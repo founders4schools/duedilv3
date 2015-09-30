@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
 
-from ... import Resource
+from ... import ProResource
 
 
-class Directorship(Resource):
+class Directorship(ProResource):
     attribute_names = [
         'id',
         # string Director ID

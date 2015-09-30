@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
 
-from ... import Resource
+from ... import ProResource
 
 
-class RegisteredAddress(Resource):
+class RegisteredAddress(ProResource):
     attribute_names = [
         # 'id',
         # string The registered ID of the company

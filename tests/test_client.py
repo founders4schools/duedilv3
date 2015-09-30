@@ -149,6 +149,38 @@ class ProClientTestCase(unittest.TestCase):
                          'http://duedil.io/v3/sandbox')
 
     @requests_mock.mock()
+    def test_search_validation(self, m):
+        result = {
+            'locale': 'uk',
+            'url': 'http://duedil.io/v3/uk/companies/06999618.json',
+            'id': '06999618',
+            'name': 'Duedil Limited'
+        }
+        url = 'http://duedil.io/v3/companies.json'
+        m.register_uri('GET', url,
+                       json={'response': {'data': [result]}})
+        with self.assertRaises(TypeError):
+            self.client.search_company(name=54)
+        with self.assertRaises(TypeError):
+            self.client.search_company(employee_count=54)
+        with self.assertRaises(ValueError):
+            self.client.search_company(employee_count=[54,100,4000])
+        with self.assertRaises(TypeError):
+            self.client.search_company(employee_count=["54","100"])
+        with self.assertRaises(TypeError):
+            self.client.search_company(name="Duedil", order_by=['field'])
+        with self.assertRaises(ValueError):
+            self.client.search_company(name="Duedil", order_by={'bar':1})
+        with self.assertRaises(TypeError):
+            self.client.search_company(name="Duedil", order_by={'field':'foo'})
+        with self.assertRaises(ValueError):
+            self.client.search_company(name="Duedil", order_by={'field':'name', 'direction': 'bar'})
+        with self.assertRaises(TypeError):
+            self.client.search_company(name="Duedil", limit='10')
+        with self.assertRaises(TypeError):
+            self.client.search_company(name="Duedil", offset='10')
+
+    @requests_mock.mock()
     def test_search_company(self, m):
         result = {
             'locale': 'uk',

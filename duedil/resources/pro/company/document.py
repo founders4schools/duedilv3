@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
 
-from ... import Resource
+from ... import ProResource
 
 
-class Document(Resource):
+class Document(ProResource):
     attribute_names = [
         'id',
         # string Document ID

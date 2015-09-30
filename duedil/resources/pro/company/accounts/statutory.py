@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
 
-from .... import Resource
+from .... import ProResource
 
 
-class AccountDetailsStatutory(Resource):
+class AccountDetailsStatutory(ProResource):
     attribute_names = [
         'id',
         # string Accounts ID

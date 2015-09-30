@@ -19,7 +19,6 @@
 from __future__ import unicode_literals
 
 
-from .apiconst import COMPANY_TERM_FILTERS, COMPANY_RANGE_FILTERS, DIRECTOR_TERM_FILTERS, DIRECTOR_RANGE_FILTERS
 from .search.pro import CompanySearchResult as ProCompanySearchResult, DirectorSearchResult
 from .search.lite import CompanySearchResult as LiteCompanySearchResult
 from .search.international import CompanySearchResult as InternationalCompanySearchResult
@@ -147,8 +146,90 @@ class LiteClient(Client):
 
 class ProClient(Client):
     api_type = 'pro'
+    company_term_filters = [
+        "locale",
+        "location",
+        "postcode",
+        "sic_code",
+        "sic_2007_code",
+        "status",
+        "currency",
+        "keywords",
+        "name",
+    ]
+    company_range_filters = [
+        "employee_count",
+        "turnover",
+        "turnover_delta_percentage",
+        "gross_profit",
+        "gross_profit_delta_percentage",
+        "cost_of_sales",
+        "cost_of_sales_delta_percentage",
+        "net_assets",
+        "net_assets_delta_percentage",
+        "current_assets",
+        "current_assets_delta_percentage",
+        "total_assets",
+        "total_assets_delta_percentage",
+        "cash",
+        "cash_delta_percentage",
+        "total_liabilities",
+        "total_liabilities_delta_percentage",
+        "net_worth",
+        "net_worth_delta_percentage",
+        "depreciation",
+        "depreciation_delta_percentage",
+        "taxation",
+        "retained_profits",
+        "profit_ratio",
+        "inventory_turnover_ratio",
+        "net_profitability",
+        "return_on_capital_employed",
+        "cash_to_total_assets_ratio",
+        "gearing",
+        "gross_margin_ratio",
+        "return_on_assets_ratio",
+        "current_ratio",
+        "debt_to_capital_ratio",
+        "cash_to_current_liabilities_ratio",
+        "liquidity_ratio",
+    ]
+    director_term_filters = [
+        "name",
+        "gender",
+        "title",
+        "nationality",
+        "secretarial",
+        "corporate",
+        "disqualified",
+    ]
+    director_range_filters = [
+        "age",
+        "data_of_birth",
+        "gross_profit",
+        "gross_profit_delta_percentage",
+        "turnover",
+        "turnover_delta_percentage",
+        "cost_of_sales",
+        "cost_of_sales_delta_percentage",
+        "depreciation",
+        "depreciation_delta_percentage",
+        "taxation",
+        "cash",
+        "cash_delta_percentage",
+        "net_worth",
+        "net_worth_delta_percentage",
+        "total_assets",
+        "total_assets_delta_percentage",
+        "current_assets",
+        "current_assets_delta_percentage",
+        "net_assets",
+        "net_assets_delta_percentage",
+        "total_liabilities",
+        "total_liabilities_delta_percentage",
+    ]
 
-    def _build_search_string(self, term_filters, range_filters=None,
+    def _build_search_string(self, term_filters, range_filters,
                              order_by=None, limit=None, offset=None,
                              **kwargs):
         data = {}
@@ -231,8 +312,8 @@ class ProClient(Client):
         '''
         return self._search('companies',
                             ProCompanySearchResult,
-                            COMPANY_TERM_FILTERS,
-                            COMPANY_RANGE_FILTERS,
+                            self.company_term_filters,
+                            self.company_range_filters,
                             order_by=order_by,
                             limit=limit,
                             offset=offset,
@@ -251,8 +332,8 @@ class ProClient(Client):
         '''
         return self._search('directors',
                             DirectorSearchResult,
-                            DIRECTOR_TERM_FILTERS,
-                            DIRECTOR_RANGE_FILTERS,
+                            self.director_term_filters,
+                            self.director_range_filters,
                             order_by=order_by,
                             limit=limit,
                             offset=offset,

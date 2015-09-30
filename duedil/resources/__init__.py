@@ -86,12 +86,11 @@ class Resource(object):
         return endpoint
 
 
-class LoadableResource(Resource):
-    _endpoint = None
+class ProResource(Resource):
 
     # def __init__(self, client, id=None, locale='uk',
     #              **kwargs):
-    #     super(LoadableResource, self).__init__(**kwargs)
+    #     super(ProResource, self).__init__(**kwargs)
     #     self.id = id
     #     assert(locale in ['uk', 'roi'])
     #     self.locale = locale
@@ -102,35 +101,26 @@ class LoadableResource(Resource):
     #     lazily return attributes, only contact duedil if necessary
     #     """
     #     try:
-    #         return super(LoadableResource, self).__getattribute__(name)
+    #         return super(ProResource, self).__getattribute__(name)
     #     except AttributeError:
     #         if name in self.attribute_names:
     #             self.load()
-    #             return super(LoadableResource, self).__getattribute__(name)
+    #             return super(ProResource, self).__getattribute__(name)
     #         else:
     #             raise
 
     def _assign_attributes(self, data=None):
-        assert(data['response'].get('id') == self.id)
+        assert(data['response'].get('id') == self.id), \
+            'Requested company ID does not match specified ID, something gone wrong!'
         self._set_attributes(missing=True, **data['response'])
 
     def load(self):
         """
         get results from duedil
         """
-        endpoint = self.endpoint
-        if self.id:
-            endpoint = endpoint.format(id=self.id)
-        result = self.client.get(endpoint)
+        result = self.client.get(self.endpoint)
         self._assign_attributes(result)
         return result
-
-    @property
-    def endpoint(self):
-        endpoint = self._endpoint
-        if self.id:
-            endpoint = endpoint.format(id=self.id)
-        return endpoint
 
 
 def resource_property(endpoint):
