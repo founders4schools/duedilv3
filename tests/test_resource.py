@@ -27,7 +27,6 @@ import requests_mock
 from duedil.resources import Resource, ProResource, RelatedResourceMixin
 from duedil.resources.pro.company import Company
 from duedil.resources.lite import Company as LiteCompany
-from duedil.api import ProClient, LiteClient
 
 API_KEY = '12345'
 
@@ -39,6 +38,10 @@ class TestEndpointResource(Resource):
     attribute_names = ['name', 'id', 'category']
 
 class TestAttrResource(Resource):
+    attribute_names = ['name', 'id', 'category']
+    path = 'test'
+
+class TestAttrProResource(ProResource):
     attribute_names = ['name', 'id', 'category']
     path = 'test'
 
@@ -73,30 +76,28 @@ class TestHasRelatedResources(RelatedResourceMixin, ProResource):
 
 class ResourceTestCase(unittest.TestCase):
 
-    client = ProClient(API_KEY)
-
     def test_resource_no_allowed_attributes(self):
         with self.assertRaises(NotImplementedError):
-            TestResource(self.client)
+            TestResource(API_KEY, 123)
 
     def test_bad_endpoint(self):
         with self.assertRaises(ValueError):
-            TestEndpointResource(self.client).endpoint
+            TestEndpointResource(API_KEY, 12345).endpoint
 
     @requests_mock.mock()
     def test_load_resource(self, m):
-        m.register_uri('GET', 'http://duedil.io/v3/uk/test.json',
-                       json={'name': 'Duedil', 'id': 12345, 'category': 'thing'})
-        res = TestAttrResource(self.client, load=True)
+        m.register_uri('GET', 'http://duedil.io/v3/uk/test/12345.json',
+                       json={"response":{'name': 'Duedil', 'id': 12345, 'category': 'thing'}})
+        res = TestAttrProResource(API_KEY, 12345, load=True)
         self.assertEqual(res.category, 'thing')
 
     @requests_mock.mock()
     def test_resource_set_attribute(self, m):
-        m.register_uri('GET', 'http://duedil.io/v3/uk/test.json',
+        m.register_uri('GET', 'http://api.duedil.com/open/uk/test/12345.json',
                        json={'response': {'name': 'Duedil', 'id': 12345, 'category': None}})
-        res = TestAttrResource(self.client, name="Duedil")
+        res = TestAttrResource(API_KEY, 12345, name="Duedil")
 
-        self.assertIsNone(res.id)
+        self.assertEqual(res.id, 12345)
         self.assertEqual(res.name, 'Duedil')
         self.assertFalse(hasattr(res, 'category'))
 
@@ -107,15 +108,13 @@ class ResourceTestCase(unittest.TestCase):
 
 class ProResourceTestCase(unittest.TestCase):
 
-    client = ProClient(API_KEY)
-
 
     @requests_mock.mock()
     def test_load_on_get(self, m):
         m.register_uri('GET', 'http://duedil.io/v3/uk/resources/12345.json',
                        json={'response': {'name': 'Duedil', 'id': 12345}})
 
-        res = TestProResource(self.client, id=12345)
+        res = TestProResource(API_KEY, id=12345)
         name = res.name
         self.assertEqual(name, 'Duedil')
         with self.assertRaises(AttributeError):
@@ -124,16 +123,15 @@ class ProResourceTestCase(unittest.TestCase):
 
 class RelatedResourceTestCase(unittest.TestCase):
 
-    client = ProClient(API_KEY)
-
     @requests_mock.mock()
     def test_load_related(self, m):
         m.register_uri(
             'GET', 'http://duedil.io/v3/uk/test/12345/test-related.json',
             json={'response': {
-                'name': 'Duedil'
+                'name': 'Duedil',
+                'id': '67890'
             }})
-        res = TestHasRelatedResources(self.client, id=12345)
+        res = TestHasRelatedResources(API_KEY, id=12345)
         related = res.test_related
         self.assertIsInstance(related, TestRelatedResource)
 
@@ -142,9 +140,10 @@ class RelatedResourceTestCase(unittest.TestCase):
         m.register_uri(
             'GET', 'http://duedil.io/v3/uk/test/12345/test-string.json',
             json={'response': {
-                'name': 'Duedil'
+                'name': 'Duedil',
+                'id': '67890'
             }})
-        res = TestHasRelatedResources(self.client, id=12345)
+        res = TestHasRelatedResources(API_KEY, id=12345)
         related = res.test_string
         self.assertIsInstance(related, Company)
 
@@ -153,12 +152,13 @@ class RelatedResourceTestCase(unittest.TestCase):
         m.register_uri(
             'GET', 'http://duedil.io/v3/uk/test/12345/test-loadable.json',
             json={'response': {
-                'name': 'Duedil'
+                'name': 'Duedil',
+                'id': '67890'
             }})
-        res = TestHasRelatedResources(self.client, id=12345)
+        res = TestHasRelatedResources(API_KEY, id=12345)
         related = res.test_loadable
         self.assertIsInstance(related, TestRelatedProResource)
-        self.assertIs(related.client, self.client)
+        self.assertIs(related.client.api_key, API_KEY)
 
     @requests_mock.mock()
     def test_load_related_list(self, m):
@@ -166,9 +166,10 @@ class RelatedResourceTestCase(unittest.TestCase):
             'GET',
             'http://duedil.io/v3/uk/test/12345/test-related-list.json',
             json={'response': {'data': [{
-                'name': 'Duedil'
+                'name': 'Duedil',
+                'id': '67890'
             }]}})
-        res = TestHasRelatedResources(self.client, id=12345)
+        res = TestHasRelatedResources(API_KEY, id=12345)
         related = res.test_related_list
         self.assertIsInstance(related[0], TestRelatedListResource)
 
@@ -176,10 +177,8 @@ class RelatedResourceTestCase(unittest.TestCase):
 
 class LiteCompanyTestCase(unittest.TestCase):
 
-    client = LiteClient(API_KEY)
-
     def test_company_number(self):
-        company = LiteCompany(self.client, company_number=12345)
+        company = LiteCompany(API_KEY, company_number=12345)
         self.assertEqual(company.id, 12345)
 
     @requests_mock.mock()
@@ -188,7 +187,7 @@ class LiteCompanyTestCase(unittest.TestCase):
                        json={'name': 'Duedil',
                              'company_number': "12345"})
 
-        company = LiteCompany(self.client, company_number=12345)
+        company = LiteCompany(API_KEY, company_number=12345)
         self.assertEqual(company.name, 'Duedil')
 
 

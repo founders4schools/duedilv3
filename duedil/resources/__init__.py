@@ -22,6 +22,7 @@ import sys
 import six
 import json
 
+from ..api import LiteClient, ProClient#, InternationalClient
 
 
 class Resource(object):
@@ -29,8 +30,9 @@ class Resource(object):
     locale = 'uk'
     id = None
     path = None
+    client_class = LiteClient
 
-    def __init__(self, client, id=None, locale='uk', load=False, **kwargs):
+    def __init__(self, api_key, id, locale='uk', load=False, **kwargs):
         if not self.attribute_names:
             raise NotImplementedError(
                 "Resources must include a list of allowed attributes")
@@ -38,7 +40,7 @@ class Resource(object):
         self.id = id
         assert(locale in ['uk', 'roi'])
         self.locale = locale
-        self.client = client
+        self.client = self.client_class(api_key, sandbox=kwargs.pop('sandbox', False))
 
         if load:
             self.load()
@@ -87,31 +89,11 @@ class Resource(object):
 
 
 class ProResource(Resource):
-
-    # def __init__(self, client, id=None, locale='uk',
-    #              **kwargs):
-    #     super(ProResource, self).__init__(**kwargs)
-    #     self.id = id
-    #     assert(locale in ['uk', 'roi'])
-    #     self.locale = locale
-    #     self.client = client
-
-    # def __getattr__(self, name):
-    #     """
-    #     lazily return attributes, only contact duedil if necessary
-    #     """
-    #     try:
-    #         return super(ProResource, self).__getattribute__(name)
-    #     except AttributeError:
-    #         if name in self.attribute_names:
-    #             self.load()
-    #             return super(ProResource, self).__getattribute__(name)
-    #         else:
-    #             raise
+    client_class = ProClient
 
     def _assign_attributes(self, data=None):
-        assert(data['response'].get('id') == self.id), \
-            'Requested company ID does not match specified ID, something gone wrong!'
+        # assert(data['response'].get('id') == self.id), \
+            # 'Requested company ID does not match specified ID, something gone wrong!'
         self._set_attributes(missing=True, **data['response'])
 
     def load(self):
@@ -120,7 +102,13 @@ class ProResource(Resource):
         """
         result = self.client.get(self.endpoint)
         self._assign_attributes(result)
-        return result
+
+
+
+
+
+
+# Here be metaclass dragons that don't make complete sense as to why we have them
 
 
 def resource_property(endpoint):
@@ -187,6 +175,7 @@ class RelatedResourceMixin(six.with_metaclass(RelatedResourceMeta, object)):
     def load_related(self, key, klass=None):
         internal_key = '_' + key.replace('-', '_')
 
+
         related = getattr(self, internal_key, None)
 
         if related is None:
@@ -202,11 +191,12 @@ class RelatedResourceMixin(six.with_metaclass(RelatedResourceMeta, object)):
                     for r in result['response']['data']:
                         r['locale'] = r.get('locale', self.locale)
                         related.append(
-                            klass(self.client, **r) if klass else None
+                            klass(self.client.api_key, **r) if klass else None
                         )
                 elif result:
                     response['locale'] = response.get('locale', self.locale)
                     if klass:
-                        related = klass(self.client, **response)
+                        print(response)
+                        related = klass(self.client.api_key, **response)
                 setattr(self, internal_key, related)
         return related

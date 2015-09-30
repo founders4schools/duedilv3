@@ -1,9 +1,10 @@
 
 
-from ...resources import Resource
+# from ...resources import Resource
+from .. import SearchResource
 
 
-class CompanySearchResult(Resource):
+class CompanySearchResult(SearchResource):
     attribute_names = [
         'locale'
         'name'

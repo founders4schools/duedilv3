@@ -97,7 +97,7 @@ class ClientTestCase(unittest.TestCase):
                        status_code=404, reason="Not Found")
 
         response = client.get('12345')
-        self.assertIsNone(response)
+        self.assertEqual(response, {})
 
     @requests_mock.mock()
     def test_other_http_error(self, m):

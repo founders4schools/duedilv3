@@ -33,8 +33,11 @@ class Cache(object):
 
     _raw_dict = {}
 
-    def __init__(self, raw_dict={}):
-        self._raw_dict = {}
+    def __init__(self, raw_dict=None):
+        if not raw_dict:
+            self._raw_dict = {}
+        else:
+            self._raw_dict = raw_dict
 
     def _cache_key(self, key, url_params):
         cache_key = key
