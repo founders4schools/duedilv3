@@ -39,5 +39,5 @@ class Company(six.with_metaclass(SearchableResourceMeta, Resource)):
         # obj information about the company's returns
     ]
 
-    def __init__(self, client, company_number=None, **kwargs):
-        super(Company, self).__init__(client, id=company_number, **kwargs)
+    def __init__(self, api_key, company_number=None, **kwargs):
+        super(Company, self).__init__(api_key=api_key, id=company_number, **kwargs)

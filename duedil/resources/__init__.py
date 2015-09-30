@@ -32,7 +32,7 @@ class Resource(object):
     path = None
     client_class = LiteClient
 
-    def __init__(self, api_key, id, locale='uk', load=False, **kwargs):
+    def __init__(self, id, api_key=None, locale='uk', load=False, **kwargs):
         if not self.attribute_names:
             raise NotImplementedError(
                 "Resources must include a list of allowed attributes")
@@ -191,12 +191,12 @@ class RelatedResourceMixin(six.with_metaclass(RelatedResourceMeta, object)):
                     for r in result['response']['data']:
                         r['locale'] = r.get('locale', self.locale)
                         related.append(
-                            klass(self.client.api_key, **r) if klass else None
+                            klass(api_key=self.client.api_key, **r) if klass else None
                         )
                 elif result:
                     response['locale'] = response.get('locale', self.locale)
                     if klass:
                         print(response)
-                        related = klass(self.client.api_key, **response)
+                        related = klass(api_key=self.client.api_key, **response)
                 setattr(self, internal_key, related)
         return related
