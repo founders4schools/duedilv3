@@ -3,6 +3,11 @@
 History
 =======
 
+0.4.5 (2015/10/01)
+------------------
+
+- Added container magic methods to Resource class
+
 0.4.4 (2015/09/30)
 ----------------
 
