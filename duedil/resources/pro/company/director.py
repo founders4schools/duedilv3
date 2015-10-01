@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-import six
 
 from ... import ProResource, RelatedResourceMixin
 

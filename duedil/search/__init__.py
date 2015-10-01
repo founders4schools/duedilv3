@@ -1,25 +1,20 @@
 
 
-
-
-
-
-
-
 class SearchResource(object):
     attribute_names = None
     locale = 'uk'
-    id = None
+    rid = None
     path = None
 
-    def __init__(self, api_key, id=None, locale='uk', **kwargs):
+    def __init__(self, client, rid=None, locale='uk', **kwargs):
         if not self.attribute_names:
             raise NotImplementedError(
                 "Resources must include a list of allowed attributes")
 
-        self.id = id
+        self.rid = rid
         assert(locale in ['uk', 'roi'])
         self.locale = locale
+        self.client = client
 
         if kwargs:
             self._set_attributes(**kwargs)
@@ -43,10 +38,10 @@ class SearchResource(object):
         lazily return attributes, only contact duedil if necessary
         """
         try:
-            return super(Resource, self).__getattribute__(name)
+            return super(SearchResource, self).__getattribute__(name)
         except AttributeError:
             if name in self.attribute_names:
                 self.load()
-                return super(Resource, self).__getattribute__(name)
+                return super(SearchResource, self).__getattribute__(name)
             else:
                 raise

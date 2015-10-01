@@ -78,26 +78,26 @@ class ResourceTestCase(unittest.TestCase):
 
     def test_resource_no_allowed_attributes(self):
         with self.assertRaises(NotImplementedError):
-            TestResource(api_key=API_KEY, id=123)
+            TestResource(api_key=API_KEY, rid=123)
 
     def test_bad_endpoint(self):
         with self.assertRaises(ValueError):
-            TestEndpointResource(api_key=API_KEY, id=12345).endpoint
+            TestEndpointResource(api_key=API_KEY, rid=12345).endpoint
 
     @requests_mock.mock()
     def test_load_resource(self, m):
         m.register_uri('GET', 'http://duedil.io/v3/uk/test/12345.json',
                        json={"response":{'name': 'Duedil', 'id': 12345, 'category': 'thing'}})
-        res = TestAttrProResource(api_key=API_KEY, id=12345, load=True)
+        res = TestAttrProResource(api_key=API_KEY, rid=12345, load=True)
         self.assertEqual(res.category, 'thing')
 
     @requests_mock.mock()
     def test_resource_set_attribute(self, m):
         m.register_uri('GET', 'http://api.duedil.com/open/uk/test/12345.json',
                        json={'response': {'name': 'Duedil', 'id': 12345, 'category': None}})
-        res = TestAttrResource(api_key=API_KEY, id=12345, name="Duedil")
+        res = TestAttrResource(api_key=API_KEY, rid=12345, name="Duedil")
 
-        self.assertEqual(res.id, 12345)
+        self.assertEqual(res.rid, 12345)
         self.assertEqual(res.name, 'Duedil')
         self.assertFalse(hasattr(res, 'category'))
 
@@ -114,7 +114,7 @@ class ProResourceTestCase(unittest.TestCase):
         m.register_uri('GET', 'http://duedil.io/v3/uk/resources/12345.json',
                        json={'response': {'name': 'Duedil', 'id': 12345}})
 
-        res = TestProResource(api_key=API_KEY, id=12345)
+        res = TestProResource(api_key=API_KEY, rid=12345)
         name = res.name
         self.assertEqual(name, 'Duedil')
         with self.assertRaises(AttributeError):
@@ -131,7 +131,7 @@ class RelatedResourceTestCase(unittest.TestCase):
                 'name': 'Duedil',
                 'id': '67890'
             }})
-        res = TestHasRelatedResources(api_key=API_KEY, id=12345)
+        res = TestHasRelatedResources(api_key=API_KEY, rid=12345)
         related = res.test_related
         self.assertIsInstance(related, TestRelatedResource)
 
@@ -143,7 +143,7 @@ class RelatedResourceTestCase(unittest.TestCase):
                 'name': 'Duedil',
                 'id': '67890'
             }})
-        res = TestHasRelatedResources(api_key=API_KEY, id=12345)
+        res = TestHasRelatedResources(api_key=API_KEY, rid=12345)
         related = res.test_string
         self.assertIsInstance(related, Company)
 
@@ -155,7 +155,7 @@ class RelatedResourceTestCase(unittest.TestCase):
                 'name': 'Duedil',
                 'id': '67890'
             }})
-        res = TestHasRelatedResources(api_key=API_KEY, id=12345)
+        res = TestHasRelatedResources(api_key=API_KEY, rid=12345)
         related = res.test_loadable
         self.assertIsInstance(related, TestRelatedProResource)
         self.assertIs(related.client.api_key, API_KEY)
@@ -169,7 +169,7 @@ class RelatedResourceTestCase(unittest.TestCase):
                 'name': 'Duedil',
                 'id': '67890'
             }]}})
-        res = TestHasRelatedResources(api_key=API_KEY, id=12345)
+        res = TestHasRelatedResources(api_key=API_KEY, rid=12345)
         related = res.test_related_list
         self.assertIsInstance(related[0], TestRelatedListResource)
 
@@ -179,7 +179,7 @@ class LiteCompanyTestCase(unittest.TestCase):
 
     def test_company_number(self):
         company = LiteCompany(api_key=API_KEY, company_number=12345)
-        self.assertEqual(company.id, 12345)
+        self.assertEqual(company.rid, 12345)
 
     @requests_mock.mock()
     def test_load_company_number(self, m):

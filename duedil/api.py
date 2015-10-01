@@ -353,5 +353,5 @@ class InternationalClient(Client):
         return self._get(endpoint, data)
 
     # this should be a Resource and not here...
-    def report(self, country_code, id):
-        return self.get(country_code, 'report/{}'.format(id), {})
+    def report(self, country_code, rid):
+        return self.get(country_code, 'report/{}'.format(rid), {})

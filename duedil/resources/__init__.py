@@ -20,7 +20,6 @@ from __future__ import unicode_literals
 
 import sys
 import six
-import json
 
 from ..api import LiteClient, ProClient#, InternationalClient
 
@@ -28,16 +27,16 @@ from ..api import LiteClient, ProClient#, InternationalClient
 class Resource(object):
     attribute_names = None
     locale = 'uk'
-    id = None
+    rid = None
     path = None
     client_class = LiteClient
 
-    def __init__(self, id, api_key=None, locale='uk', load=False, **kwargs):
+    def __init__(self, rid, api_key=None, locale='uk', load=False, **kwargs):
         if not self.attribute_names:
             raise NotImplementedError(
                 "Resources must include a list of allowed attributes")
 
-        self.id = id
+        self.rid = rid
         assert(locale in ['uk', 'roi'])
         self.locale = locale
         self.client = self.client_class(api_key, sandbox=kwargs.pop('sandbox', False))
@@ -83,8 +82,8 @@ class Resource(object):
                     model=self.__class__.__name__))
         endpoint = '{locale}/{path}'.format(locale=self.locale,
                                             path=self.path)
-        if self.id:
-            endpoint += '/{id}'.format(id=self.id)
+        if self.rid:
+            endpoint += '/{id}'.format(id=self.rid)
         return endpoint
 
 
@@ -137,11 +136,10 @@ class SearchableResourceMeta(type):
             )
         return results
 
-from importlib import import_module
 
 class RelatedResourceMeta(type):
 
-    def __init__(klass, name, bases, ns):
+    def __init__(klass, _name, _bases, ns):
         related_resources = ns.get('related_resources') or {}
 
         for ep in related_resources.keys():
@@ -191,12 +189,12 @@ class RelatedResourceMixin(six.with_metaclass(RelatedResourceMeta, object)):
                     for r in result['response']['data']:
                         r['locale'] = r.get('locale', self.locale)
                         related.append(
-                            klass(api_key=self.client.api_key, **r) if klass else None
+                            klass(api_key=self.client.api_key, rid=r.pop('id'), **r) if klass else None
                         )
                 elif result:
                     response['locale'] = response.get('locale', self.locale)
                     if klass:
                         print(response)
-                        related = klass(api_key=self.client.api_key, **response)
+                        related = klass(api_key=self.client.api_key, rid=response.pop('id'), **response)
                 setattr(self, internal_key, related)
         return related

@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import six
-
-from ... import (ProResource, RelatedResourceMixin,
-                         SearchableRelatedResourceMeta)
+from ... import (ProResource, RelatedResourceMixin)
 
 
 class Company(RelatedResourceMixin, ProResource):
@@ -240,7 +237,6 @@ class Company(RelatedResourceMixin, ProResource):
     related_resources = {
         'service-addresses': 'resources.pro.company.ServiceAddress',
         'registered-address': 'resources.pro.company.RegisteredAddress',
-        'directors': 'resources.pro.company.Director',
         'parent': 'resources.pro.company.Company',
         'directors': 'resources.pro.company.Director',
         'directorships': 'resources.pro.company.DirectorShip',
