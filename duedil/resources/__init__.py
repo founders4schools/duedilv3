@@ -23,6 +23,9 @@ import six
 
 from ..api import LiteClient, ProClient#, InternationalClient
 
+class ReadOnlyException(Exception):
+    pass
+
 
 class Resource(object):
     attribute_names = None
@@ -58,8 +61,8 @@ class Resource(object):
                     self.__setattr__(allowed, None)
 
     def load(self):
-        result = self.client.get(self.endpoint)
-        self._set_attributes(**result)
+        self._result = self.client.get(self.endpoint)
+        self._set_attributes(**self._result)
 
     def __getattr__(self, name):
         """
@@ -85,6 +88,34 @@ class Resource(object):
         if self.rid:
             endpoint += '/{id}'.format(id=self.rid)
         return endpoint
+
+    def __len__(self):
+        return len(self.attribute_names)
+
+    def __getitem__(self, key):
+        return self.__getattr__(key)
+
+    def __setitem__(self, key, item):
+        raise ReadOnlyException('This is a read-only API so you cannot set attributes')
+
+    def __delitem__(self, key):
+        raise ReadOnlyException('This is a read-only API so you cannot delete attributes')
+
+    def __iter__(self):
+        self.load()
+        return iter(self._result)
+
+    def __contains__(self, key):
+        if key in self._results.keys():
+            return True
+        if key in self._results.values():
+            return True
+        return False
+
+    def __missing__(self, key):
+        raise KeyError('%s in not a valid attribute' % key)
+
+
 
 
 class ProResource(Resource):
@@ -198,3 +229,6 @@ class RelatedResourceMixin(six.with_metaclass(RelatedResourceMeta, object)):
                         related = klass(api_key=self.client.api_key, rid=response.pop('id'), **response)
                 setattr(self, internal_key, related)
         return related
+
+    def __len__(self):
+        return len(self.attribute_names + self.related_resources)
