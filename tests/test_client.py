@@ -110,6 +110,31 @@ class ClientTestCase(unittest.TestCase):
             response = client.get('12345')
             self.assertIsNone(response)
 
+    @requests_mock.mock()
+    def test_throttling_qps(self, m):
+        client = TestClient(API_KEY)
+        url = 'http://duedil.io/v3/12345.json'
+        m.register_uri('GET', (url + '?api_key=' + API_KEY), [
+                       {'status_code': 403, 'reason': "Forbidden - Over rate limit", "text": "<h1>Developer Over Qps</h1>"},
+                       {'status_code': 200, 'json': {'name': 'Duedil', 'id': '12345'}},
+                      ])
+        data = {'name': 'Duedil', 'id': '12345'}
+        response = client.get('12345')
+        self.assertEqual(response, {'name': 'Duedil', 'id': '12345'})
+
+    @requests_mock.mock()
+    def test_throttling_quota(self, m):
+        client = TestClient(API_KEY)
+        url = 'http://duedil.io/v3/12345.json'
+        m.register_uri('GET', (url + '?api_key=' + API_KEY), [
+                       {'status_code': 403, 'reason': "Forbidden - Over rate limit", "text": "<h1>Developer Over Rate</h1>"},
+                       {'status_code': 200, 'json': {'name': 'Duedil', 'id': '12345'}},
+                      ])
+        data = {'name': 'Duedil', 'id': '12345'}
+        response = client.get('12345')
+        self.assertEqual(response, {'name': 'Duedil', 'id': '12345'})
+
+
     def test_incorrect_query_params(self):
         with self.assertRaises(ValueError):
             TestClient(API_KEY)._build_search_string(q='searchthing')

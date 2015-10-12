@@ -29,6 +29,8 @@ import json
 import requests
 from requests.exceptions import HTTPError
 
+from retrying import retry
+
 try:  # pragma: no cover
     long
 except NameError:  # pragma: no cover
@@ -47,6 +49,17 @@ API_URLS = {
     'international': 'http://api.duedil.com/international',
 }
 API_KEY = os.environ.get('DUEDIL_API_KEY', None)
+
+
+def retry_throttling(exception):
+    if isinstance(exception, HTTPError):
+        if exception.response.status_code == 403:
+            if exception.response.reason == "Forbidden - Over rate limit":
+                if 'Developer Over Qps' in exception.response.text:
+                    return True
+                elif 'Developer Over Rate' in exception.response.text:
+                    return True
+    return False
 
 
 class Client(object):
@@ -77,6 +90,7 @@ class Client(object):
     def get(self, endpoint, data=None):
         return self._get(endpoint, data)
 
+    @retry(retry_on_exception=retry_throttling, wait_exponential_multiplier=1000, wait_exponential_max=10000)
     def _get(self, endpoint, data=None):
         'this should become the private interface to all reequests to the api'
 
@@ -88,8 +102,6 @@ class Client(object):
             resp_format = '.{}'.format(data_format)
         else:
             resp_format = ''
-
-
 
         url = "{base_url}/{endpoint}{format}"
         prepared_url = url.format(base_url=self.base_url,
