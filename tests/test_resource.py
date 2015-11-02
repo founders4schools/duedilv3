@@ -27,8 +27,12 @@ import requests_mock
 from duedil.resources import Resource, ProResource, RelatedResourceMixin
 from duedil.resources.pro.company import Company
 from duedil.resources.lite import Company as LiteCompany
+from duedil.cache import configure_cache
 
 API_KEY = '12345'
+
+
+cache_region = configure_cache('dogpile.cache.null')
 
 
 class TestResource(Resource):
@@ -178,7 +182,7 @@ class RelatedResourceTestCase(unittest.TestCase):
 class LiteCompanyTestCase(unittest.TestCase):
 
     def test_company_number(self):
-        company = LiteCompany(api_key=API_KEY, company_number=12345)
+        company = LiteCompany(api_key=API_KEY, company_number=12345, cache_backend='dogpile.cache.null')
         self.assertEqual(company.rid, 12345)
 
     @requests_mock.mock()
@@ -187,7 +191,7 @@ class LiteCompanyTestCase(unittest.TestCase):
                        json={'name': 'Duedil',
                              'company_number': "12345"})
 
-        company = LiteCompany(api_key=API_KEY, company_number=12345)
+        company = LiteCompany(api_key=API_KEY, company_number=12345, cache_backend='dogpile.cache.null')
         self.assertEqual(company.name, 'Duedil')
 
 

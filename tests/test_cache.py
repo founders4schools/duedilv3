@@ -16,32 +16,32 @@
 #  under the License.
 #
 
-import unittest
-
-from duedil.cache import Cache
-
-
-class CacheTestCase(unittest.TestCase):
-    cache = Cache()
-
-    def test_get_cached(self):
-        url = 'http://duedil.io/v3/uk/companies/06999618'
-        data = {'name': 'Duedil Limited', 'company_number': '06999618'}
-
-        self.cache.set_url(url, data)
-
-        self.assertEqual(data, self.cache.get_url(url))
-
-    def test_get_uncached(self):
-        url = 'http://duedil.io/v3/uk/companies/07071234'
-
-        self.assertIsNone(self.cache.get_url(url))
-
-
-def test_suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(CacheTestCase))
-    return suite
-
-if __name__ == '__main__':
-    unittest.main()
+# import unittest
+#
+# from duedil.cache import Cache
+#
+#
+# class CacheTestCase(unittest.TestCase):
+#     cache = Cache()
+#
+#     def test_get_cached(self):
+#         url = 'http://duedil.io/v3/uk/companies/06999618'
+#         data = {'name': 'Duedil Limited', 'company_number': '06999618'}
+#
+#         self.cache.set_url(url, data)
+#
+#         self.assertEqual(data, self.cache.get_url(url))
+#
+#     def test_get_uncached(self):
+#         url = 'http://duedil.io/v3/uk/companies/07071234'
+#
+#         self.assertIsNone(self.cache.get_url(url))
+#
+#
+# def test_suite():
+#     suite = unittest.TestSuite()
+#     suite.addTest(unittest.makeSuite(CacheTestCase))
+#     return suite
+#
+# if __name__ == '__main__':
+#     unittest.main()

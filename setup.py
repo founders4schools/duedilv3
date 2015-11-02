@@ -55,7 +55,8 @@ setup(name='duedil',
           # -*- Extra requirements: -*-
           'requests>=2,<3',
           'six==1.9.0',
-          'retrying'
+          'retrying',
+          'dogpile.cache',
       ],
       tests_require=['pytest', 'requests_mock'],
       cmdclass = {'test': PyTest},

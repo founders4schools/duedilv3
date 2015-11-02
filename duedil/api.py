@@ -23,6 +23,8 @@ from .search.lite import CompanySearchResult as LiteCompanySearchResult
 from .search.pro import CompanySearchResult as ProCompanySearchResult, DirectorSearchResult
 from .search.international import CompanySearchResult as InternationalCompanySearchResult
 
+from .cache import configure_cache, dp_region as cache_region
+
 import os
 import json
 
@@ -66,9 +68,8 @@ class Client(object):
     cache = None
     base_url = None
 
-    def __init__(self, api_key=None, sandbox=False, cache=None):
+    def __init__(self, api_key=None, sandbox=False):
         'Initialise the Client with which API to connect to and what cache to use'
-        self.cache = cache
         self.set_api(api_key, sandbox)
 
     def set_api(self, api_key=None, sandbox=False):
@@ -90,6 +91,7 @@ class Client(object):
     def get(self, endpoint, data=None):
         return self._get(endpoint, data)
 
+    @cache_region.cache_on_arguments()
     @retry(retry_on_exception=retry_throttling, wait_exponential_multiplier=1000, wait_exponential_max=10000)
     def _get(self, endpoint, data=None):
         'this should become the private interface to all reequests to the api'
@@ -108,9 +110,6 @@ class Client(object):
                                   endpoint=endpoint,
                                   format=resp_format)
 
-        if self.cache:
-            result = self.cache.get_url(prepared_url, url_params=data)
-
         if not result:
             params = data.copy()
             params['api_key'] = self.api_key
@@ -118,9 +117,6 @@ class Client(object):
             try:
                 if not response.raise_for_status():
                     result = response.json()
-                    if self.cache:
-                        self.cache.set_url(prepared_url, result,
-                                           url_params=params)
             except HTTPError:
                 if response.status_code == 404:
                     result = {}

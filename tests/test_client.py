@@ -26,7 +26,6 @@ import requests_mock
 from requests.exceptions import HTTPError
 
 from duedil.api import LiteClient, ProClient, InternationalClient, Client
-from duedil.cache import Cache
 from duedil.resources.lite import Company as LiteCompany
 from duedil.search.pro import CompanySearchResult as ProCompanySearchResult, DirectorSearchResult
 from duedil.search.lite import CompanySearchResult as LiteCompanySearchResult
@@ -62,32 +61,32 @@ class ClientTestCase(unittest.TestCase):
 
         self.assertEqual(response, {'name': 'Duedil', 'id': '12345'})
 
-    @requests_mock.mock()
-    def test_cached_get(self, m):
-        cache = Cache()
-        client = TestClient(API_KEY, cache=cache)
-        url = 'http://duedil.io/v3/12345.json'
-        m.register_uri('GET', (url + '?api_key=' + API_KEY),
-                       json={'name': 'Duedil', 'id': '12345'})
-
-        client.get('12345')
-
-        self.assertEqual(cache.get_url(url),
-                         {'name': 'Duedil', 'id': '12345'})
-
-    @requests_mock.mock()
-    def test_get_with_params(self, m):
-        cache = Cache()
-        client = TestClient(API_KEY, cache=cache)
-        params = {'filters': {'name': 'Duedil Ltd'}}
-        url = 'http://duedil.io/v3/12345.json'
-        m.register_uri('GET', url, json={'name': 'Duedil', 'id': '12345'})
-
-        client.get('12345', data=params)
-
-        cached = cache.get_url('http://duedil.io/v3/12345.json',
-                               url_params=params)
-        self.assertEqual(cached, {'name': 'Duedil', 'id': '12345'})
+    # @requests_mock.mock()
+    # def test_cached_get(self, m):
+    #     cache = Cache()
+    #     client = TestClient(API_KEY, cache=cache)
+    #     url = 'http://duedil.io/v3/12345.json'
+    #     m.register_uri('GET', (url + '?api_key=' + API_KEY),
+    #                    json={'name': 'Duedil', 'id': '12345'})
+    #
+    #     client.get('12345')
+    #
+    #     self.assertEqual(cache.get_url(url),
+    #                      {'name': 'Duedil', 'id': '12345'})
+    #
+    # @requests_mock.mock()
+    # def test_get_with_params(self, m):
+    #     cache = Cache()
+    #     client = TestClient(API_KEY, cache=cache)
+    #     params = {'filters': {'name': 'Duedil Ltd'}}
+    #     url = 'http://duedil.io/v3/12345.json'
+    #     m.register_uri('GET', url, json={'name': 'Duedil', 'id': '12345'})
+    #
+    #     client.get('12345', data=params)
+    #
+    #     cached = cache.get_url('http://duedil.io/v3/12345.json',
+    #                            url_params=params)
+    #     self.assertEqual(cached, {'name': 'Duedil', 'id': '12345'})
 
     @requests_mock.mock()
     def test_404(self, m):
