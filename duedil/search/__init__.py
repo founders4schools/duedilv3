@@ -1,20 +1,25 @@
 
+from importlib import import_module
 
 class SearchResource(object):
     attribute_names = None
     locale = 'uk'
     rid = None
     path = None
+    result_obj = {}
 
-    def __init__(self, client, rid=None, locale='uk', **kwargs):
+    def __init__(self, client, id=None, locale='uk', load=False, **kwargs):
         if not self.attribute_names:
             raise NotImplementedError(
                 "Resources must include a list of allowed attributes")
 
-        self.rid = rid
+        self.rid = id
         assert(locale in ['uk', 'roi'])
         self.locale = locale
         self.client = client
+        self.should_load = True if load else False
+        if load:
+            self.load()
 
         if kwargs:
             self._set_attributes(**kwargs)
@@ -43,5 +48,14 @@ class SearchResource(object):
             if name in self.attribute_names:
                 self.load()
                 return super(SearchResource, self).__getattribute__(name)
+            elif name in self.result_obj.keys():
+                mod_path, klass_str = self.result_obj[name].rsplit('.', 1)
+                mod = import_module(mod_path)
+                klass = getattr(mod, klass_str)
+                return klass(self.rid, client=self.client, locale=self.locale, load=self.should_load)
             else:
                 raise
+
+    # def get_object(self, object_cls):
+    #     # this should get the id and create the appropriate resource and return it
+    #     return object_cls(self.id, client=self.client, locale=self.locale, load=self.should_load)

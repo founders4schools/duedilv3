@@ -10,3 +10,6 @@ class CompanySearchResult(SearchResource):
         'name',
         'company_url'
     ]
+    result_obj = {
+        'company': 'duedil.resources.pro.company.Company'
+    }

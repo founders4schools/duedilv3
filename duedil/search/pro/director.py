@@ -11,3 +11,8 @@ class DirectorSearchResult(SearchResource):
         'directorships_url',
         'companies_url',
     ]
+
+    result_obj = {
+        # this import path is incorrect.
+        'director': 'duedil.resources.pro.director.Director'
+    }

@@ -34,7 +34,7 @@ class Resource(object):
     path = None
     client_class = LiteClient
 
-    def __init__(self, rid, api_key=None, locale='uk', load=False, **kwargs):
+    def __init__(self, rid, api_key=None, locale='uk', load=False, client=None, **kwargs):
         if not self.attribute_names:
             raise NotImplementedError(
                 "Resources must include a list of allowed attributes")
@@ -42,7 +42,10 @@ class Resource(object):
         self.rid = rid
         assert(locale in ['uk', 'roi'])
         self.locale = locale
-        self.client = self.client_class(api_key, sandbox=kwargs.pop('sandbox', False))
+        if client:
+            self.client = client
+        else:
+            self.client = self.client_class(api_key, sandbox=kwargs.pop('sandbox', False))
 
         if load:
             self.load()
