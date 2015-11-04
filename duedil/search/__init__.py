@@ -49,6 +49,9 @@ class SearchResource(object):
                 self.load()
                 return super(SearchResource, self).__getattribute__(name)
             elif name in self.result_obj.keys():
+                # Assumes subclass has dict defined called result_obj, this maps attribute name to
+                # string of module path including class to be instaniated.
+                # The below dynamically imports the module and then gets the class, then returns and instance of the class
                 mod_path, klass_str = self.result_obj[name].rsplit('.', 1)
                 mod = import_module(mod_path)
                 klass = getattr(mod, klass_str)
