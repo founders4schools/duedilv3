@@ -89,8 +89,7 @@ class Client(object):
             self.base_url = self.base_url + '/sandbox'
 
     def get(self, endpoint, data=None):
-        response = self._get(endpoint, data)
-        return
+        return self._get(endpoint, data)
 
     def pre_request_hook(self, endpoint, data):
         '''This is so that custom code can be run before an api call e.g. metric collection
