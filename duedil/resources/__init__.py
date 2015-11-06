@@ -118,6 +118,11 @@ class Resource(object):
     def __missing__(self, key):
         raise KeyError('%s in not a valid attribute' % key)
 
+    def __str__(self):
+        return '{} ({})'.format(self.__class__.__name__, self.rid)
+
+    def __eq__(self, other):
+        return self.rid == other.rid
 
 
 
@@ -228,7 +233,6 @@ class RelatedResourceMixin(six.with_metaclass(RelatedResourceMeta, object)):
                 elif result:
                     response['locale'] = response.get('locale', self.locale)
                     if klass:
-                        print(response)
                         related = klass(api_key=self.client.api_key, rid=response.pop('id'), **response)
                 setattr(self, internal_key, related)
         return related

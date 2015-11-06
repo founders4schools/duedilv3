@@ -59,6 +59,7 @@ class SearchResource(object):
             else:
                 raise
 
-    # def get_object(self, object_cls):
-    #     # this should get the id and create the appropriate resource and return it
-    #     return object_cls(self.id, client=self.client, locale=self.locale, load=self.should_load)
+    def __eq__(self, other):
+        if hasattr(other, 'rid'):
+            return self.rid == other.rid
+        return self.rid == other

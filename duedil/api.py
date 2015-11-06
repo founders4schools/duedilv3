@@ -89,7 +89,19 @@ class Client(object):
             self.base_url = self.base_url + '/sandbox'
 
     def get(self, endpoint, data=None):
-        return self._get(endpoint, data)
+        response = self._get(endpoint, data)
+        return
+
+    def pre_request_hook(self, endpoint, data):
+        '''This is so that custom code can be run before an api call e.g. metric collection
+        This is a 'read only' method in that you cannot affect what will be sent to duedil'''
+        pass
+
+    def post_request_hook(self, response):
+        '''This is so that custom code can be run after an api call e.g. metric collection
+        IMPORTANT: no validation has been done on the request at this point and it is 'read only'
+        you cannot affect further processing of the response'''
+        pass
 
     @cache_region.cache_on_arguments()
     @retry(retry_on_exception=retry_throttling, wait_exponential_multiplier=1000, wait_exponential_max=10000)
@@ -109,11 +121,13 @@ class Client(object):
         prepared_url = url.format(base_url=self.base_url,
                                   endpoint=endpoint,
                                   format=resp_format)
+        self.pre_request_hook(prepared_url, data)
 
         if not result:
             params = data.copy()
             params['api_key'] = self.api_key
             response = requests.get(prepared_url, params=params)
+            self.post_request_hook(response)
             try:
                 if not response.raise_for_status():
                     result = response.json()
@@ -122,6 +136,7 @@ class Client(object):
                     result = {}
                 else:
                     raise
+
         return result
 
     def _search(self, endpoint, result_klass, *args, **kwargs):
