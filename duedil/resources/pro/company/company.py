@@ -247,6 +247,7 @@ class Company(RelatedResourceMixin, ProResource):
         'bank-accounts': 'resources.pro.company.BankAccount',
         'mortgages': 'resources.pro.company.Mortgage',
         'subsidiaries': 'resources.pro.company.Company',
+        'keywords': 'resources.pro.company.Keywords',
     }
 
     range_filters = [

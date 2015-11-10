@@ -16,11 +16,12 @@ from .previous_company_name import PreviousCompanyName
 from .registered_address import RegisteredAddress
 from .service_address import ServiceAddress
 from .shareholder import Shareholder
+from .company_keywords import Keywords
 
 __all__ = ['AccountDetailsFinancial', 'AccountDetailsGAAP',
            'AccountDetailsIFRS', 'AccountDetailsInsurance',
            'AccountDetailsStatutory', 'BankAccount',
            'Company', 'Director', 'Directorship', 'Document',
-           'Industry', 'Mortgage',
+           'Industry', 'Mortgage', 'Keywords',
            'PreviousCompanyName', 'RegisteredAddress',
            'ServiceAddress', 'Shareholder']
