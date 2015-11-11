@@ -238,4 +238,4 @@ class RelatedResourceMixin(six.with_metaclass(RelatedResourceMeta, object)):
         return related
 
     def __len__(self):
-        return len(self.attribute_names + self.related_resources)
+        return len(self.attribute_names + self.related_resources.keys())
