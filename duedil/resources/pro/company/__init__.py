@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from .accounts import Account
 from .accounts.financial import AccountDetailsFinancial
 from .accounts.gaap import AccountDetailsGAAP
 from .accounts.ifrs import AccountDetailsIFRS

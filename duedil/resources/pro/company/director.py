@@ -60,8 +60,8 @@ class Director(RelatedResourceMixin, ProResource):
     ]
 
     related_resources = {
-        'companies': 'resources.pro.company.Company',
-        'directorships': 'resources.pro.company.DirectorShip',
+        'companies': 'pro.company.Company',
+        'directorships': 'pro.company.DirectorShip',
     }
 
     term_filters = [

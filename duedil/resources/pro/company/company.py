@@ -235,19 +235,19 @@ class Company(RelatedResourceMixin, ProResource):
     ]
 
     related_resources = {
-        'service-addresses': 'resources.pro.company.ServiceAddress',
-        'registered-address': 'resources.pro.company.RegisteredAddress',
-        'parent': 'resources.pro.company.Company',
-        'directors': 'resources.pro.company.Director',
-        'directorships': 'resources.pro.company.DirectorShip',
-        'accounts': 'resources.pro.company.Account',
-        'previous-company-names': 'resources.pro.company.PreviousCompanyName',
-        'industries': 'resources.pro.company.Industry',
-        'shareholders': 'resources.pro.company.Shareholder',
-        'bank-accounts': 'resources.pro.company.BankAccount',
-        'mortgages': 'resources.pro.company.Mortgage',
-        'subsidiaries': 'resources.pro.company.Company',
-        'keywords': 'resources.pro.company.Keywords',
+        'service-addresses': 'pro.company.ServiceAddress',
+        'registered-address': 'pro.company.RegisteredAddress',
+        'parent': 'pro.company.Company',
+        'directors': 'pro.company.Director',
+        'directorships': 'pro.company.DirectorShip',
+        'accounts': 'pro.company.Account',
+        'previous-company-names': 'pro.company.PreviousCompanyName',
+        'industries': 'pro.company.Industry',
+        'shareholders': 'pro.company.Shareholder',
+        'bank-accounts': 'pro.company.BankAccount',
+        'mortgages': 'pro.company.Mortgage',
+        'subsidiaries': 'pro.company.Company',
+        'keywords': 'pro.company.Keywords',
     }
 
     range_filters = [

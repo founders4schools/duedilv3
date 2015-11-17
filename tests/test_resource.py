@@ -72,7 +72,7 @@ class TestHasRelatedResources(RelatedResourceMixin, ProResource):
     related_resources = {
         'test-related': TestRelatedResource,
         'test-related-list': TestRelatedListResource,
-        'test-string': 'resources.pro.company.Company',
+        'test-string': 'pro.company.Company',
         'test-loadable': TestRelatedProResource,
     }
     attribute_names = ['name']

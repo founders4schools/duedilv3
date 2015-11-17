@@ -21,7 +21,8 @@ from __future__ import unicode_literals
 import sys
 import six
 
-from ..api import LiteClient, ProClient#, InternationalClient
+from ..api import LiteClient, ProClient  # , InternationalClient
+
 
 class ReadOnlyException(Exception):
     pass
@@ -125,9 +126,9 @@ class Resource(object):
         return self.rid == other.rid
 
 
-
 class ProResource(Resource):
     client_class = ProClient
+    full_endpoint = False
 
     def _assign_attributes(self, data=None):
         # assert(data['response'].get('id') == self.id), \
@@ -140,10 +141,6 @@ class ProResource(Resource):
         """
         result = self.client.get(self.endpoint)
         self._assign_attributes(result)
-
-
-
-
 
 
 # Here be metaclass dragons that don't make complete sense as to why we have them
@@ -189,13 +186,14 @@ class RelatedResourceMeta(type):
 
                 if isinstance(resource, six.string_types):
                     module, resource = resource.rsplit('.', 1)
-                    resource = getattr(sys.modules['duedil.%s' % module], resource)
+                    resource = getattr(sys.modules['duedil.resources.%s' % module], resource)
 
-                return self.load_related(endpoint, resource)
+                return self.load_related(endpoint, resource, self.full_endpoint)
 
             attr_name = ep.replace('-', '_')
             setattr(klass, attr_name,
                     property(getter, None, None, attr_name))
+
 
 class SearchableRelatedResourceMeta(SearchableResourceMeta, RelatedResourceMeta):
     pass
@@ -204,26 +202,26 @@ class SearchableRelatedResourceMeta(SearchableResourceMeta, RelatedResourceMeta)
 class RelatedResourceMixin(six.with_metaclass(RelatedResourceMeta, object)):
     related_resources = None
 
-    def _get(self, resource):
-        uri = '{endpoint}/{resource}'.format(endpoint=self.endpoint,
-                                             resource=resource)
+    def _get(self, resource, full_endpoint=False):
+        if not full_endpoint:
+            uri = '{endpoint}/{resource}'.format(endpoint=self.endpoint,
+                                                 resource=resource)
+        else:
+            uri = self.endpoint
         return self.client.get(uri)
 
-    def load_related(self, key, klass=None):
+    def load_related(self, key, klass=None, full_endpoint=False):
         internal_key = '_' + key.replace('-', '_')
-
 
         related = getattr(self, internal_key, None)
 
         if related is None:
-            result = self._get(key)
+            result = self._get(key, full_endpoint)
+            # print result, key
             if result:
                 response = result['response']
                 related = None
-                if (
-                    'data' in response and
-                    isinstance(response['data'], (list, tuple))
-                ):
+                if 'data' in response and isinstance(response['data'], (list, tuple)):
                     related = []
                     for r in result['response']['data']:
                         r['locale'] = r.get('locale', self.locale)
