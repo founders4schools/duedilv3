@@ -4,6 +4,7 @@ from .... import ProResource
 
 
 class AccountDetailsInsurance(ProResource):
+    full_endpoint = True
     attribute_names = [
         'account_status',
         # integer Account status

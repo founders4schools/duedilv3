@@ -40,4 +40,4 @@ class Company(six.with_metaclass(SearchableResourceMeta, Resource)):
     ]
 
     def __init__(self, api_key, company_number=None, **kwargs):
-        super(Company, self).__init__(api_key=api_key, rid=company_number, **kwargs)
+        super(Company, self).__init__(api_key=api_key, id=company_number, **kwargs)

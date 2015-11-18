@@ -192,6 +192,7 @@ class Company(RelatedResourceMixin, ProResource):
         'reg_web',
         # string Registered web address
         'sic2007code',
+        'sic2007description',
         # integer 2007 Standard Industry Classification (SIC) code
         'trading_address1',
         # string Trading address street

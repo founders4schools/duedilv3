@@ -4,6 +4,7 @@ from .... import ProResource
 
 
 class AccountDetailsFinancial(ProResource):
+    full_endpoint = True
     attribute_names = [
         'id',
         # string Accounts ID

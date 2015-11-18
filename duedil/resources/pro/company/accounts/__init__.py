@@ -10,7 +10,6 @@ class UnknownAccountTypeException(Exception):
     pass
 
 
-# need to deal with pagination...
 class Account(RelatedResourceMixin, ProResource):
     'Abstraction of Accounts resource in duedil v3 pro api'
     attribute_names = [
@@ -27,6 +26,9 @@ class Account(RelatedResourceMixin, ProResource):
     }
     full_endpoint = True
 
+    def __iter__(self):
+        return iter(dict([(i,getattr(self, i)) for i in self.attribute_names]))
+
     @property
     def path(self):
         return self.uri.split('/', 5)[-1].rsplit('/', 1)[0]
@@ -38,4 +40,6 @@ class Account(RelatedResourceMixin, ProResource):
         if isinstance(resource, six.string_types):
             module, resource = resource.rsplit('.', 1)
             resource = getattr(sys.modules['duedil.resources.%s' % module], resource)
-        return self.load_related('details', resource, self.full_endpoint)
+        resource_obj = self.load_related('details', resource, self.full_endpoint)
+        resource_obj.path = '{}'.format(self.path)
+        return resource_obj

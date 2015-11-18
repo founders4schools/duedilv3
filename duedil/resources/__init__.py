@@ -20,6 +20,8 @@ from __future__ import unicode_literals
 
 import sys
 import six
+from collections import MutableMapping
+from abc import ABCMeta
 
 from ..api import LiteClient, ProClient  # , InternationalClient
 
@@ -28,19 +30,19 @@ class ReadOnlyException(Exception):
     pass
 
 
-class Resource(object):
+class Resource(MutableMapping):
     attribute_names = None
     locale = 'uk'
-    rid = None
+    id = None
     path = None
     client_class = LiteClient
 
-    def __init__(self, rid, api_key=None, locale='uk', load=False, client=None, **kwargs):
+    def __init__(self, id, api_key=None, locale='uk', load=False, client=None, **kwargs):
         if not self.attribute_names:
             raise NotImplementedError(
                 "Resources must include a list of allowed attributes")
 
-        self.rid = rid
+        self.id = id
         assert(locale in ['uk', 'roi'])
         self.locale = locale
         if client:
@@ -89,8 +91,8 @@ class Resource(object):
                     model=self.__class__.__name__))
         endpoint = '{locale}/{path}'.format(locale=self.locale,
                                             path=self.path)
-        if self.rid:
-            endpoint += '/{id}'.format(id=self.rid)
+        if self.id:
+            endpoint += '/{id}'.format(id=self.id)
         return endpoint
 
     def __len__(self):
@@ -120,27 +122,31 @@ class Resource(object):
         raise KeyError('%s in not a valid attribute' % key)
 
     def __str__(self):
-        return '{} ({})'.format(self.__class__.__name__, self.rid)
+        return '{} ({})'.format(self.__class__.__name__, self.id)
 
     def __eq__(self, other):
-        return self.rid == other.rid
+        return self.id == other.id
 
 
 class ProResource(Resource):
     client_class = ProClient
     full_endpoint = False
 
-    def _assign_attributes(self, data=None):
-        # assert(data['response'].get('id') == self.id), \
-            # 'Requested company ID does not match specified ID, something gone wrong!'
-        self._set_attributes(missing=True, **data['response'])
+    # def _assign_attributes(self, data=None):
+    #     # assert(data['response'].get('id') == self.id), \
+    #         # 'Requested company ID does not match specified ID, something gone wrong!'
+    #     self._set_attributes(missing=True, **data['response'])
+
+    def __iter__(self):
+        self.load()
+        return iter(self._result['response'])
 
     def load(self):
         """
         get results from duedil
         """
-        result = self.client.get(self.endpoint)
-        self._assign_attributes(result)
+        self._result = self.client.get(self.endpoint)
+        self._set_attributes(**self._result['response'])
 
 
 # Here be metaclass dragons that don't make complete sense as to why we have them
@@ -173,11 +179,10 @@ class SearchableResourceMeta(type):
         return results
 
 
-class RelatedResourceMeta(type):
+class RelatedResourceMeta(ABCMeta):
 
     def __init__(klass, _name, _bases, ns):
         related_resources = ns.get('related_resources') or {}
-
         for ep in related_resources.keys():
 
             @resource_property(ep)
@@ -210,6 +215,7 @@ class RelatedResourceMixin(six.with_metaclass(RelatedResourceMeta, object)):
             uri = self.endpoint
         return self.client.get(uri)
 
+# need to deal with pagination...
     def load_related(self, key, klass=None, full_endpoint=False):
         internal_key = '_' + key.replace('-', '_')
 
@@ -226,12 +232,12 @@ class RelatedResourceMixin(six.with_metaclass(RelatedResourceMeta, object)):
                     for r in result['response']['data']:
                         r['locale'] = r.get('locale', self.locale)
                         related.append(
-                            klass(api_key=self.client.api_key, rid=r.pop('id'), **r) if klass else None
+                            klass(api_key=self.client.api_key, id=r.pop('id'), **r) if klass else None
                         )
                 elif result:
                     response['locale'] = response.get('locale', self.locale)
                     if klass:
-                        related = klass(api_key=self.client.api_key, rid=response.pop('id'), **response)
+                        related = klass(api_key=self.client.api_key, id=response.pop('id'), **response)
                 setattr(self, internal_key, related)
         return related
 

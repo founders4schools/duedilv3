@@ -4,7 +4,7 @@ from importlib import import_module
 class SearchResource(object):
     attribute_names = None
     locale = 'uk'
-    rid = None
+    id = None
     path = None
     result_obj = {}
 
@@ -13,7 +13,7 @@ class SearchResource(object):
             raise NotImplementedError(
                 "Resources must include a list of allowed attributes")
 
-        self.rid = id
+        self.id = id
         assert(locale in ['uk', 'roi'])
         self.locale = locale
         self.client = client
@@ -55,11 +55,11 @@ class SearchResource(object):
                 mod_path, klass_str = self.result_obj[name].rsplit('.', 1)
                 mod = import_module(mod_path)
                 klass = getattr(mod, klass_str)
-                return klass(self.rid, client=self.client, locale=self.locale, load=self.should_load)
+                return klass(self.id, client=self.client, locale=self.locale, load=self.should_load)
             else:
                 raise
 
     def __eq__(self, other):
-        if hasattr(other, 'rid'):
-            return self.rid == other.rid
-        return self.rid == other
+        if hasattr(other, 'id'):
+            return self.id == other.id
+        return self.id == other

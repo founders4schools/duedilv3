@@ -4,6 +4,7 @@ from .... import ProResource
 
 
 class AccountDetailsIFRS(ProResource):
+    full_endpoint = True
     attribute_names = [
         'id',
         # string Accounts ID

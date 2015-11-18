@@ -13,4 +13,4 @@ class CompanySearchResult(SearchResource):
     ]
 
     def __init__(self, client, company_number=None, **kwargs):
-        super(CompanySearchResult, self).__init__(client, rid=company_number, **kwargs)
+        super(CompanySearchResult, self).__init__(client, id=company_number, **kwargs)
