@@ -5,7 +5,7 @@ import six
 from .. import Resource, SearchableResourceMeta
 
 
-class Company(six.with_metaclass(SearchableResourceMeta, Resource)):
+class Company(Resource):
     path = 'company'
     search_path = 'search'
     attribute_names = [
