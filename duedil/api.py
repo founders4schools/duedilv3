@@ -19,9 +19,9 @@
 from __future__ import unicode_literals
 
 
-from .search.lite import CompanySearchResult as LiteCompanySearchResult
-from .search.pro import CompanySearchResult as ProCompanySearchResult, DirectorSearchResult
-from .search.international import CompanySearchResult as InternationalCompanySearchResult
+from .search.lite import CompanySearchResult as LiteCompanySearchResult, LiteSearchResourceList
+from .search.pro import CompanySearchResult as ProCompanySearchResult, DirectorSearchResult, ProSearchResourceList
+from .search.international import CompanySearchResult as InternationalCompanySearchResult, InternationalSearchResourceList
 
 from .cache import configure_cache, dp_region as cache_region
 
@@ -102,6 +102,7 @@ class Client(object):
         you cannot affect further processing of the response'''
         pass
 
+# - _get should probably be split a bit more to allow full urls to be called
     @cache_region.cache_on_arguments()
     @retry(retry_on_exception=retry_throttling, wait_exponential_multiplier=1000, wait_exponential_max=10000)
     def _get(self, endpoint, data=None):
@@ -141,7 +142,8 @@ class Client(object):
     def _search(self, endpoint, result_klass, *args, **kwargs):
         query_params = self._build_search_string(*args, **kwargs)
         results = self._get(endpoint, data=query_params)
-        return [result_klass(self, **r) for r in results.get('response',{}).get('data', {})]
+        # return [result_klass(self, **r) for r in results.get('response',{}).get('data', {})]
+        return self.search_list_class(results, result_klass, self)
 
     def _build_search_string(self, *args, **kwargs):
         data = {}
@@ -157,6 +159,7 @@ class Client(object):
 
 class LiteClient(Client):
     api_type = 'lite'
+    search_list_class = LiteSearchResourceList
 
     def search(self, query):
         #  this will need to be alter in all likely hood to do some validation
@@ -165,6 +168,7 @@ class LiteClient(Client):
 
 class ProClient(Client):
     api_type = 'pro'
+    search_list_class = ProSearchResourceList
 
     def _build_search_string(self, term_filters, range_filters,
                              order_by=None, limit=None, offset=None,
@@ -283,6 +287,7 @@ class ProClient(Client):
 
 class InternationalClient(Client):
     api_type = 'international'
+    search_list_class = InternationalSearchResourceList
 
     def search(self, country_code, query):
         endpoint = '{}/search'.format(country_code)

@@ -29,6 +29,7 @@ from duedil.api import LiteClient, ProClient, InternationalClient, Client
 from duedil.resources.lite import Company as LiteCompany
 from duedil.search.pro import CompanySearchResult as ProCompanySearchResult, DirectorSearchResult
 from duedil.search.lite import CompanySearchResult as LiteCompanySearchResult
+from duedil.search.international import CompanySearchResult as InternationalCompanySearchResult, InternationalSearchResourceList
 
 API_KEY = '12345'
 
@@ -214,7 +215,7 @@ class ProClientTestCase(unittest.TestCase):
         }
         url = 'http://duedil.io/v3/companies.json'
         m.register_uri('GET', url,
-                       json={'response': {'data': [result]}})
+                       json={'response': {'data': [result], 'pagination':{'total':1}}})
         companies = self.client.search_company()
         self.assertEqual(len(companies), 1)
         self.assertIn('api_key=12345', m._adapter.last_request.query)
@@ -231,7 +232,7 @@ class ProClientTestCase(unittest.TestCase):
         }
         url = 'http://duedil.io/v3/directors.json'
         m.register_uri('GET', url,
-                       json={'response': {'data': [result]}})
+                       json={'response': {'data': [result], 'pagination':{'total':1}}})
         directors = self.client.search_director()
         self.assertEqual(len(directors), 1)
         self.assertIn('api_key=12345', m._adapter.last_request.query)
@@ -248,7 +249,7 @@ class ProClientTestCase(unittest.TestCase):
         }
         url = 'http://duedil.io/v3/directors.json'
         m.register_uri('GET', url,
-                       json={'response': {'data': [result]}})
+                       json={'response': {'data': [result], 'pagination':{'total':1}}})
         result = {
             'locale': 'uk',
             'url': 'http://duedil.io/v3/uk/companies/06999618.json',
@@ -257,7 +258,7 @@ class ProClientTestCase(unittest.TestCase):
         }
         url = 'http://duedil.io/v3/companies.json'
         m.register_uri('GET', url,
-                       json={'response': {'data': [result]}})
+                       json={'response': {'data': [result], 'pagination':{'total':1}}})
         results = self.client.search()
         self.assertEqual(len(results), 2)
         self.assertIn('api_key=12345', m._adapter.last_request.query)
@@ -272,7 +273,9 @@ class SearchQueryTestCase(unittest.TestCase):
     @requests_mock.mock()
     def test_search_filter(self, m):
         m.register_uri('GET', self.url,
-                       json={})
+                       json={
+                       'response':{'pagination':{'total':0}}
+                       })
         self.client.search_company(name='DueDil')
         self.assertEqual(
             json.loads(m._adapter.last_request.qs['filters'][0]),
@@ -281,7 +284,9 @@ class SearchQueryTestCase(unittest.TestCase):
     @requests_mock.mock()
     def test_search_range(self, m):
         m.register_uri('GET', self.url,
-                       json={})
+                       json={
+                        'response':{'pagination':{'total':0}}
+                       })
         self.client.search_company(employee_count=(1, 100,))
         self.assertEqual(
             json.loads(m._adapter.last_request.qs['filters'][0]),
@@ -290,14 +295,18 @@ class SearchQueryTestCase(unittest.TestCase):
     @requests_mock.mock()
     def test_search_non_filter_or_range(self, m):
         m.register_uri('GET', self.url,
-                       json={})
+                       json={
+                       'response':{'pagination':{'total':0}}
+                       })
         with self.assertRaises(TypeError):
             self.client.search_company(non_filter="Not Implemented")
 
     @requests_mock.mock()
     def test_search_order(self, m):
         m.register_uri('GET', self.url,
-                       json={})
+                       json={
+                       'response':{'pagination':{'total':0}}
+                       })
         self.client.search_company(order_by={'field': 'name',
                                              'direction': 'asc'})
         self.assertEqual(
@@ -307,14 +316,18 @@ class SearchQueryTestCase(unittest.TestCase):
     @requests_mock.mock()
     def test_search_limit(self, m):
         m.register_uri('GET', self.url,
-                       json={})
+                       json={
+                       'response':{'pagination':{'total':0}}
+                       })
         self.client.search_company(limit=100)
         self.assertEqual(m._adapter.last_request.qs['limit'][0], '100')
 
     @requests_mock.mock()
     def test_search_offset(self, m):
         m.register_uri('GET', self.url,
-                       json={})
+                       json={
+                       'response':{'pagination':{'total':0}}
+                       })
         self.client.search_company(offset=50)
         self.assertEqual(m._adapter.last_request.qs['offset'][0], '50')
 
@@ -338,7 +351,7 @@ class I12ClientTestCase(unittest.TestCase):
     @requests_mock.mock()
     def test_search(self, m):
         m.register_uri('GET', 'http://api.duedil.com/international/uk/search?q=Acme', json={})
-        self.assertEqual(self.client.search('uk', 'Acme'), [])
+        self.assertEqual(self.client.search('uk', 'Acme'), InternationalSearchResourceList({}, InternationalCompanySearchResult, self.client))
 
 
 def test_suite():

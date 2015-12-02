@@ -20,7 +20,7 @@ from __future__ import unicode_literals
 
 import sys
 import six
-from collections import MutableMapping
+from collections import Mapping
 from abc import ABCMeta
 
 from ..api import LiteClient, ProClient  # , InternationalClient
@@ -30,7 +30,7 @@ class ReadOnlyException(Exception):
     pass
 
 
-class Resource(MutableMapping):
+class Resource(Mapping):
     attribute_names = None
     locale = 'uk'
     id = None
@@ -100,12 +100,6 @@ class Resource(MutableMapping):
 
     def __getitem__(self, key):
         return self.__getattr__(key)
-
-    def __setitem__(self, key, item):
-        raise ReadOnlyException('This is a read-only API so you cannot set attributes')
-
-    def __delitem__(self, key):
-        raise ReadOnlyException('This is a read-only API so you cannot delete attributes')
 
     def __iter__(self):
         self.load()

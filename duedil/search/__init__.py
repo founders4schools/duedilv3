@@ -1,5 +1,8 @@
 
 from importlib import import_module
+from collections import Sequence
+
+
 
 class SearchResource(object):
     attribute_names = None
@@ -63,3 +66,51 @@ class SearchResource(object):
         if hasattr(other, 'id'):
             return self.id == other.id
         return self.id == other
+
+
+
+class SearchResouceList(Sequence):
+
+    def __init__(self, results, result_klass, client):
+        self._result_list = []
+        self.result_klass = result_klass
+        self.client = client
+        self.result_list = results
+
+    def __len__(self):
+        return len(self.result_list)
+
+    def __getitem__(self, key):
+        return self.result_list[key]
+
+    def __iter__(self):
+        return iter(self.result_list)
+
+    def __contains__(self, result):
+        return result in self.result_list
+
+    def __eq__(self, other):
+        rlist = self.result_list == other.result_list
+        client = self.client == other.client
+        rclass = self.result_klass == other.result_klass
+        return rlist and client and rclass
+
+    def __add__(self, other):
+        if self.client.api_key == other.client.api_key:
+            return self.result_list + other.result_list
+        raise TypeError('Cannot join results from 2 different applications (api keys)')
+
+    def __radd__(self, other):
+        return self.__add__(other)
+
+    @property
+    def result_list(self):
+        return self._result_list
+
+    @result_list.setter
+    def result_list(self, value):
+        temp = [self.result_klass(self.client, **r) for r in value.get('response',{}).get('data', {})]
+        if not self._result_list:
+            self._result_list = temp
+        else:
+            self._result_list.extend(temp)
