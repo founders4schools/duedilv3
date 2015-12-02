@@ -3,8 +3,12 @@ from .director import DirectorSearchResult
 from .. import SearchResouceList
 
 from collections import Sequence
-from urllib import urlencode
-import urlparse
+try:
+    from urllib import urlencode
+    import urlparse
+except ImportError:
+    from urllib.parse import urlencode
+    from urllib import parse as urlparse
 
 class ProSearchResourceList(SearchResouceList):
 

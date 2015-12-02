@@ -15,8 +15,9 @@ class PyTest(test_command):
 
     def finalize_options(self):
         test_command.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
+        if sys.version_info.major < 3:
+            self.test_args = []
+            self.test_suite = True
 
     def run_tests(self):
         # import here, cause outside the eggs aren't loaded
@@ -25,7 +26,7 @@ class PyTest(test_command):
         sys.exit(errno)
 
 
-version = '0.6.0'
+version = '0.6.1'
 
 setup(name='duedil',
       version=version,
