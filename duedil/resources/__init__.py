@@ -36,6 +36,7 @@ class Resource(Mapping):
     id = None
     path = None
     client_class = LiteClient
+    loaded = False
 
     def __init__(self, id, api_key=None, locale='uk', load=False, client=None, **kwargs):
         if not self.attribute_names:

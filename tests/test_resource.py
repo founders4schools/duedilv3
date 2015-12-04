@@ -53,6 +53,7 @@ class TestAttrProResource(ProResource):
 class TestProResource(ProResource):
     attribute_names = ['name', 'id']
     path = "resources"
+    loaded = False
 
 
 class TestRelatedResource(Resource):
