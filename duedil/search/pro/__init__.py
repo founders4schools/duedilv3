@@ -62,6 +62,7 @@ class ProSearchResourceList(SearchResouceList):
                 self._update_next_url(1, key)
                 return self.client.get(*self.parse_next_url())
         elif type(key) is slice:
+            # this needs to be done to limit for loop iteration...
             raise NotImplementedError("Results don't support slicing at this time")
         else:
             raise TypeError()

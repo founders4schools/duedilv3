@@ -89,7 +89,9 @@ def kwargs_key_generator(namespace, fn, **kw):
     def generate_key(*args, **kwargs):
         args_str = "_".join(str(s) for s in args)
         kwargs_str = json.dumps(kwargs)
-        return '{}_{}:{}_{}'.format(namespace, fname, args_str, kwargs_str)
+        key = '{}_{}:{}_{}'.format(namespace, fname, args_str, kwargs_str)
+        hashkey = hashlib.md5(key)
+        return hashkey.hexdigest()
     return generate_key
 
 dp_region = make_region(name='duedilv3', function_key_generator = kwargs_key_generator)
