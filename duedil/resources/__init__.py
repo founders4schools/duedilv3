@@ -68,6 +68,7 @@ class Resource(Mapping):
 
     def load(self):
         self._result = self.client.get(self.endpoint)
+        self.loaded = True
         self._set_attributes(**self._result)
 
     def __getattr__(self, name):
@@ -78,7 +79,8 @@ class Resource(Mapping):
             return super(Resource, self).__getattribute__(name)
         except AttributeError:
             if name in self.attribute_names:
-                self.load()
+                if not self.loaded:
+                    self.load()
                 return super(Resource, self).__getattribute__(name)
             else:
                 raise
@@ -102,8 +104,14 @@ class Resource(Mapping):
         return self.__getattr__(key)
 
     def __iter__(self):
-        self.load()
-        return iter(self._result)
+        # self.load()
+        # return iter(self._result)
+        for prop in self.attribute_names:
+            if hasattr(self, prop):
+                yield prop
+            else:
+                setattr(self, prop, None)
+                yield prop
 
     def __contains__(self, key):
         if key in self._results.keys():
@@ -131,15 +139,16 @@ class ProResource(Resource):
     #         # 'Requested company ID does not match specified ID, something gone wrong!'
     #     self._set_attributes(missing=True, **data['response'])
 
-    def __iter__(self):
-        self.load()
-        return iter(self._result['response'])
+    # def __iter__(self):
+    #     self.load()
+    #     return iter(self._result['response'])
 
     def load(self):
         """
         get results from duedil
         """
         self._result = self.client.get(self.endpoint)
+        self.loaded = True
         self._set_attributes(**self._result['response'])
 
 
@@ -226,12 +235,12 @@ class RelatedResourceMixin(six.with_metaclass(RelatedResourceMeta, object)):
                     for r in result['response']['data']:
                         r['locale'] = r.get('locale', self.locale)
                         related.append(
-                            klass(api_key=self.client.api_key, id=r.pop('id'), **r) if klass else None
+                            klass(client=self.client, id=r.pop('id'), **r) if klass else None
                         )
                 elif result:
                     response['locale'] = response.get('locale', self.locale)
                     if klass:
-                        related = klass(api_key=self.client.api_key, id=response.pop('id'), **response)
+                        related = klass(client=self.client, id=response.pop('id'), **response)
                 setattr(self, internal_key, related)
         return related
 

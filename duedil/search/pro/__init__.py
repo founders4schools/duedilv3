@@ -17,7 +17,7 @@ class ProSearchResourceList(SearchResouceList):
         self._next_url = None
         # look at the property below
         self.next_url = results
-        page = results.get('response', {}).get('pagination')
+        page = results.get('response', {}).get('pagination', {})
         self._length = page.get('total', len(self.result_list))
 
     @property
@@ -26,7 +26,7 @@ class ProSearchResourceList(SearchResouceList):
 
     @next_url.setter
     def next_url(self, value):
-        page = value.get('response', {}).get('pagination')
+        page = value.get('response', {}).get('pagination', {})
         if page:
             self._next_url = page.get('next_url')
         else:
