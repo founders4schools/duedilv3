@@ -107,7 +107,7 @@ class Resource(Mapping):
     def __iter__(self):
         # self.load()
         # return iter(self._result)
-        for prop in self.attribute_names:
+        for prop in self.attribute_names + ['id']:
             if hasattr(self, prop):
                 yield prop
             else:
