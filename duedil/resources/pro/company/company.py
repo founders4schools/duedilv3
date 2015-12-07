@@ -231,8 +231,8 @@ class Company(RelatedResourceMixin, ProResource):
         'trading_phone',
         'trading_phone_std',
         'company_url',
-        'turnover',
-        'turnover_delta_percentage',
+        # 'turnover',
+        # 'turnover_delta_percentage',
     ]
 
     related_resources = {

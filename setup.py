@@ -26,7 +26,7 @@ class PyTest(test_command):
         sys.exit(errno)
 
 
-version = '0.6.4'
+version = '0.6.5'
 
 setup(name='duedil',
       version=version,
