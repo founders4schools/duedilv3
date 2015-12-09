@@ -100,7 +100,7 @@ class ProSearchResourceList(SearchResouceList):
     def parse_next_url(self):
         parsed_url = urlparse.urlsplit(self._next_url)
         path = parsed_url.path.rsplit('/', 1)[-1]
-        if path.endswith('.json')
+        if path.endswith('.json'):
             path = path[:len('.json')] # grab the last part of the path
         query_params = dict(urlparse.parse_qsl(parsed_url.query))
         return path, query_params
