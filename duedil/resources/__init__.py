@@ -105,8 +105,6 @@ class Resource(Mapping):
         return self.__getattr__(key)
 
     def __iter__(self):
-        # self.load()
-        # return iter(self._result)
         for prop in self.attribute_names + ['id']:
             if hasattr(self, prop):
                 yield prop
@@ -134,15 +132,6 @@ class Resource(Mapping):
 class ProResource(Resource):
     client_class = ProClient
     full_endpoint = False
-
-    # def _assign_attributes(self, data=None):
-    #     # assert(data['response'].get('id') == self.id), \
-    #         # 'Requested company ID does not match specified ID, something gone wrong!'
-    #     self._set_attributes(missing=True, **data['response'])
-
-    # def __iter__(self):
-    #     self.load()
-    #     return iter(self._result['response'])
 
     def load(self):
         """
