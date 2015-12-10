@@ -216,7 +216,6 @@ class RelatedResourceMixin(six.with_metaclass(RelatedResourceMeta, object)):
 
         if related is None:
             result = self._get(key, full_endpoint)
-            # print result, key
             if result:
                 response = result['response']
                 related = None
@@ -228,7 +227,20 @@ class RelatedResourceMixin(six.with_metaclass(RelatedResourceMeta, object)):
                             klass(client=self.client, id=r.pop('id'), **r) if klass else None
                         )
                 elif result:
-                    response['locale'] = response.get('locale', self.locale)
+                    locale = response.get('locale')
+                    # HACK: for locale switching when traversing companies...
+                    # XXX: this will need to be revisited!!!
+                    if locale is None and 'company_url' in response:
+                        path_components = response['company_url'][len(self.client.base_url):].split('/')
+                        if 'uk' in path_components:
+                            locale = 'uk'
+                        elif 'roi' in path_components:
+                            locale = 'roi'
+                        else:
+                            locale = 'uk'
+                    else:
+                        locale = self.locale
+                    response['locale'] = locale
                     if klass:
                         related = klass(client=self.client, id=response.pop('id'), **response)
                 setattr(self, internal_key, related)
