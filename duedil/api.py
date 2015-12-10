@@ -156,6 +156,8 @@ class Client(object):
     def search(self, query):
         raise NotImplementedError
 
+    def __str__(self):
+        return 'Duedil Client type:{}'.format(self.api_type)
 
 class LiteClient(Client):
     api_type = 'lite'
