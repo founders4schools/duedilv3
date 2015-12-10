@@ -55,7 +55,7 @@ setup(name='duedil',
       install_requires=[
           # -*- Extra requirements: -*-
           'requests>=2,<3',
-          'six==1.9.0',
+          'six',
           'retrying',
           'dogpile.cache',
       ],
