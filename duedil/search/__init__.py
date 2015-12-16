@@ -67,6 +67,9 @@ class SearchResource(object):
             return self.id == other.id
         return self.id == other
 
+    def __str__(self):
+        return 'Search Result: {} ({})'.format(self.name, self.id)
+
 
 
 class SearchResouceList(Sequence):
