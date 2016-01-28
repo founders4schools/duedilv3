@@ -16,4 +16,5 @@ after_success:
     coveralls
 
 notifications:
+  email: false
   slack: f4s:u17h2Cc7RhhHNtypnAu7jbgY
