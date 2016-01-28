@@ -26,10 +26,6 @@ from abc import ABCMeta
 from ..api import LiteClient, ProClient  # , InternationalClient
 
 
-class ReadOnlyException(Exception):
-    pass
-
-
 class Resource(Mapping):
     attribute_names = None
     locale = 'uk'

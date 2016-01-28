@@ -6,10 +6,6 @@ import six
 import sys
 
 
-class UnknownAccountTypeException(Exception):
-    pass
-
-
 class Account(RelatedResourceMixin, ProResource):
     'Abstraction of Accounts resource in duedil v3 pro api'
     attribute_names = [

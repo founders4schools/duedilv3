@@ -25,7 +25,7 @@ import re
 import requests_mock
 from requests.exceptions import HTTPError
 
-from duedil.api import LiteClient, ProClient, InternationalClient, Client
+from duedil.api import LiteClient, ProClient, InternationalClient, Client, APIMonthlyLimitException
 from duedil.resources.lite import Company as LiteCompany
 from duedil.search.pro import CompanySearchResult as ProCompanySearchResult, DirectorSearchResult
 from duedil.search.lite import CompanySearchResult as LiteCompanySearchResult
@@ -131,8 +131,9 @@ class ClientTestCase(unittest.TestCase):
                        {'status_code': 200, 'json': {'name': 'Duedil', 'id': '12345'}},
                       ])
         data = {'name': 'Duedil', 'id': '12345'}
-        response = client.get('12345')
-        self.assertEqual(response, {'name': 'Duedil', 'id': '12345'})
+        with self.assertRaises(APIMonthlyLimitException):
+            response = client.get('12345')
+            self.assertIsNone(response)
 
 
     def test_incorrect_query_params(self):
