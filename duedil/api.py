@@ -52,6 +52,11 @@ API_URLS = {
 }
 API_KEY = os.environ.get('DUEDIL_API_KEY', None)
 
+class APILimitException(Exception):
+    pass
+
+class APIMonthlyLimitException(APILimitException):
+    pass
 
 def retry_throttling(exception):
     if isinstance(exception, HTTPError):
@@ -60,7 +65,7 @@ def retry_throttling(exception):
                 if 'Developer Over Qps' in exception.response.text:
                     return True
                 elif 'Developer Over Rate' in exception.response.text:
-                    return True
+                    raise APIMonthlyLimitException('Monthly Limit reached for Duedil calls')
     return False
 
 
