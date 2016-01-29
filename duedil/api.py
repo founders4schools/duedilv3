@@ -139,8 +139,8 @@ class Client(object):
             except HTTPError:
                 if response.status_code == 404:
                     result = {}
-                else:
-                    raise
+                elif 'Developer Over Rate' in response.text:
+                    raise APIMonthlyLimitException('Monthly Limit reached for Duedil calls')
 
         return result
 
