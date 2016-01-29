@@ -64,8 +64,8 @@ def retry_throttling(exception):
             if exception.response.reason == "Forbidden - Over rate limit":
                 if 'Developer Over Qps' in exception.response.text:
                     return True
-                elif 'Developer Over Rate' in exception.response.text:
-                    raise APIMonthlyLimitException('Monthly Limit reached for Duedil calls')
+                # elif 'Developer Over Rate' in exception.response.text:
+                #     raise APIMonthlyLimitException('Monthly Limit reached for Duedil calls')
     return False
 
 
