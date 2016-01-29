@@ -141,6 +141,8 @@ class Client(object):
                     result = {}
                 elif 'Developer Over Rate' in response.text:
                     raise APIMonthlyLimitException('Monthly Limit reached for Duedil calls')
+                else:
+                    raise
 
         return result
 
