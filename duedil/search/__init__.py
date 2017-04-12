@@ -1,7 +1,7 @@
 
 from importlib import import_module
 from collections import Sequence
-
+from copy import deepcopy
 
 
 class SearchResource(object):
@@ -27,13 +27,22 @@ class SearchResource(object):
         if kwargs:
             self._set_attributes(**kwargs)
 
+    @property
+    def valid_attributes(self):
+        temp = deepcopy(self.attribute_names)
+        if hasattr(self, 'term_filters'):
+            temp.extend(self.term_filters)
+        if hasattr(self, 'range_filters'):
+            temp.extend(self.range_filters)
+        return temp
+
     def _set_attributes(self, missing=False, **kwargs):
         for k, v in kwargs.items():
-            if k in self.attribute_names:
+            if k in self.valid_attributes:
                 self.__setattr__(k, v)
 
         if missing is True:
-            for allowed in self.attribute_names:
+            for allowed in self.valid_attributes:
                 if allowed not in kwargs:
                     self.__setattr__(allowed, None)
 
