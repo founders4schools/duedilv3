@@ -240,7 +240,7 @@ class Company(RelatedResourceMixin, ProResource):
         'registered-address': 'pro.company.RegisteredAddress',
         'parent': 'pro.company.Company',
         'directors': 'pro.company.Director',
-        'directorships': 'pro.company.DirectorShip',
+        'directorships': 'pro.company.Directorship',
         'accounts': 'pro.company.Account',
         'previous-company-names': 'pro.company.PreviousCompanyName',
         'industries': 'pro.company.Industry',
