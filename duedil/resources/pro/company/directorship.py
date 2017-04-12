@@ -48,4 +48,6 @@ class Directorship(ProResource):
         'owning_company',
         'resignation_date',
         'secretary',
+        'forename',
+        'surname'
     ]
