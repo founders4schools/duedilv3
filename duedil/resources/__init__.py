@@ -78,7 +78,10 @@ class Resource(Mapping):
             if name in self.attribute_names:
                 if not self.loaded:
                     self.load()
-                return super(Resource, self).__getattribute__(name)
+                try:
+                    return super(Resource, self).__getattribute__(name)
+                except AttributeError:
+                    return None
             else:
                 raise
 
