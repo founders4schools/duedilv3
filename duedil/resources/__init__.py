@@ -81,7 +81,7 @@ class Resource(Mapping):
                 try:
                     return super(Resource, self).__getattribute__(name)
                 except AttributeError:
-                    return None
+                    raise KeyError()
             else:
                 raise
 
