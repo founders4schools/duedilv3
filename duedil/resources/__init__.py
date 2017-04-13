@@ -77,7 +77,10 @@ class Resource(Mapping):
         except AttributeError:
             if name in self.attribute_names:
                 if not self.loaded:
-                    self.load()
+                    try:
+                        self.load()
+                    except ValueError:
+                        pass
                 try:
                     return super(Resource, self).__getattribute__(name)
                 except AttributeError:
