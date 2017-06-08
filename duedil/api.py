@@ -189,24 +189,24 @@ class ProClient(Client):
                 try:
                     assert(isinstance(value, basestring))
                 except AssertionError:
-                    raise TypeError('%s must be string type' % arg)
+                    raise TypeError('{0!s} must be string type'.format(arg))
             elif arg in range_filters:
                 # array of two numbers
                 try:
                     assert(isinstance(value, (list, tuple)))
                 except AssertionError:
-                    raise TypeError('%s must be an array' % arg)
+                    raise TypeError('{0!s} must be an array'.format(arg))
                 try:
                     assert(len(value) == 2)
                 except AssertionError:
-                    raise ValueError('Argument %s can only be an array of length 2' % arg)
+                    raise ValueError('Argument {0!s} can only be an array of length 2'.format(arg))
                 for v in value:
                     try:
                         assert(isinstance(v, (int, long, float)))
                     except AssertionError:
-                        raise TypeError('Value of %s must be numeric' % arg)
+                        raise TypeError('Value of {0!s} must be numeric'.format(arg))
             else:
-                raise TypeError('%s does not match %s' % (arg, ', '.join(term_filters+range_filters)))
+                raise TypeError('{0!s} does not match {1!s}'.format(arg, ', '.join(term_filters+range_filters)))
         data['filters'] = json.dumps(kwargs)
         if order_by:
             try:
@@ -220,7 +220,7 @@ class ProClient(Client):
             try:
                 assert(order_by['field'] in term_filters + range_filters)
             except AssertionError:
-                raise TypeError("order_by['field'] must be one of %s" % (', '.join(term_filters+range_filters)))
+                raise TypeError("order_by['field'] must be one of {0!s}".format((', '.join(term_filters+range_filters))))
             if order_by.get('direction'):
                 try:
                     assert(order_by['direction'] in ['asc', 'desc'])

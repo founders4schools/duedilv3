@@ -8,7 +8,7 @@ with open('lite-response.csv', 'rb') as csv_in_file:
     print ('# search response')
     for row in reader:
         var = row['Field Name']
-        print ("'%s'," % var)
+        print ("'{0!s}',".format(var))
         print ('#', row['Type'], row['Description'])
 
 print()
@@ -21,7 +21,7 @@ with open('lite-company.csv', 'rb') as csv_in_file:
     print ('# company')
     for row in reader:
         var = row['Field Name']
-        print ("'%s'," % var)
+        print ("'{0!s}',".format(var))
         print ('#', row['Type'], row['Description'])
 
 print()
