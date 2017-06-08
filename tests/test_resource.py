@@ -95,7 +95,11 @@ class ResourceTestCase(unittest.TestCase):
     @requests_mock.mock()
     def test_load_resource(self, m):
         m.register_uri('GET', 'http://duedil.io/v3/uk/test/12345.json',
-                       json={"response": {'name': 'Duedil', 'id': 12345, 'category': 'thing'}})
+                       json={"response": {
+                           'name': 'Duedil',
+                           'id': 12345,
+                           'category': 'thing'
+                           }})
         res = TestAttrProResource(api_key=API_KEY, id=12345, load=True)
         self.assertEqual(res.category, 'thing')
 
