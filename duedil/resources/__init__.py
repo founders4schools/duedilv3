@@ -110,15 +110,20 @@ class Resource(Mapping):
             raise KeyError(key)
 
     def __iter__(self):
-        for prop in self.attribute_names + ['id']:
+        attributes = self.attribute_names if 'id' in self.attribute_names else self.attribute_names + ['id']
+        for prop in attributes:
             if hasattr(self, prop):
                 yield prop
             else:
                 setattr(self, prop, None)
                 yield prop
-                
+
     def items(self):
-        return self.__iter__()
+        for item in self.__iter__():
+            try:
+                yield item, self[item]
+            except KeyError:
+                yield item, None
 
     def __contains__(self, key):
         if key in self._results.keys():

@@ -38,15 +38,18 @@ cache_region = configure_cache('dogpile.cache.null')
 class TestResource(Resource):
     pass
 
+
 class TestEndpointResource(Resource):
     attribute_names = ['name', 'id', 'category']
+
 
 class TestAttrResource(Resource):
     attribute_names = ['name', 'id', 'category']
     path = 'test'
 
+
 class TestAttrProResource(ProResource):
-    attribute_names = ['name', 'id', 'category']
+    attribute_names = ['name', 'id', 'category', 'turnover']
     path = 'test'
 
 
@@ -109,6 +112,33 @@ class ResourceTestCase(unittest.TestCase):
         res._set_attributes(True, name="Limited")
         self.assertTrue(hasattr(res, 'category'))
         self.assertIsNone(res.category)
+
+    @requests_mock.mock()
+    def test_get_attribute(self, m):
+        m.register_uri('GET', 'http://duedil.io/v3/uk/test/12345.json',
+                       json={"response": {'name': 'Duedil',
+                                          'id': 12345,
+                                          'category': 'thing',
+                                          'turnover': 1000}
+                            })
+        res = TestAttrProResource(api_key=API_KEY, id=12345)
+        with self.assertRaises(AttributeError):
+            res.does_not_exist
+        with self.assertRaises(KeyError):
+            res['does_not_exist']
+        self.assertEqual(res.category, 'thing')
+        self.assertEqual(res['turnover'], 1000)
+        
+    @requests_mock.mock()
+    def test_get_attribute(self, m):
+        m.register_uri('GET', 'http://duedil.io/v3/uk/test/12345.json',
+                       json={"response": {'name': 'Duedil',
+                                          'id': 12345,
+                                          'category': 'thing'}
+                            })
+        res = TestAttrProResource(api_key=API_KEY, id=12345)
+        items = res.items()
+        self.assertEqual(list(items), [('name', 'Duedil'), ('id', 12345), ('category', 'thing'), ('turnover', None)])
 
 
 class ProResourceTestCase(unittest.TestCase):
