@@ -52,7 +52,7 @@ master_doc = 'index'
 # General information about the project.
 project = u'Duedil'
 authors = u'Bruno Alla'
-copyright = u'{}, Founders4Schools'.format(datetime.datetime.now().year)
+copyright = u'{0}, Founders4Schools'.format(datetime.datetime.now().year)
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

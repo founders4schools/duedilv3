@@ -37,6 +37,6 @@ class Account(RelatedResourceMixin, ProResource):
             module, resource = resource.rsplit('.', 1)
             resource = getattr(sys.modules['duedil.resources.{0!s}'.format(module)], resource)
         resource_obj = self.load_related('details', resource, self.full_endpoint)
-        resource_obj.path = '{}'.format(self.path)
+        resource_obj.path = '{0}'.format(self.path)
         resource_obj.loaded = True
         return resource_obj
