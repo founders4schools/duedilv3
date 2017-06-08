@@ -72,21 +72,15 @@ class Resource(Mapping):
         """
         lazily return attributes, only contact duedil if necessary
         """
-        try:
-            return super(Resource, self).__getattribute__(name)
-        except AttributeError:
-            if name in self.attribute_names:
-                if not self.loaded:
-                    try:
-                        self.load()
-                    except ValueError:
-                        pass
+        if name in self.attribute_names:
+            if not self.loaded:
                 try:
-                    return super(Resource, self).__getattribute__(name)
-                except AttributeError:
-                    raise
-            else:
-                raise
+                    self.load()
+                except ValueError:
+                    pass
+            return super(Resource, self).__getattribute__(name)
+        else:
+            raise AttributeError
 
     @property
     def endpoint(self):
