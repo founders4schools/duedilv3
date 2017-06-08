@@ -95,7 +95,7 @@ class ResourceTestCase(unittest.TestCase):
     @requests_mock.mock()
     def test_load_resource(self, m):
         m.register_uri('GET', 'http://duedil.io/v3/uk/test/12345.json',
-                       json={"response":{'name': 'Duedil', 'id': 12345, 'category': 'thing'}})
+                       json={"response": {'name': 'Duedil', 'id': 12345, 'category': 'thing'}})
         res = TestAttrProResource(api_key=API_KEY, id=12345, load=True)
         self.assertEqual(res.category, 'thing')
 
@@ -116,10 +116,11 @@ class ResourceTestCase(unittest.TestCase):
     @requests_mock.mock()
     def test_get_attribute(self, m):
         m.register_uri('GET', 'http://duedil.io/v3/uk/test/12345.json',
-                       json={"response": {'name': 'Duedil',
-                                          'id': 12345,
-                                          'category': 'thing',
-                                          'turnover': 1000}
+                       json={"response": {
+                           'name': 'Duedil',
+                           'id': 12345,
+                           'category': 'thing',
+                           'turnover': 1000}
                             })
         res = TestAttrProResource(api_key=API_KEY, id=12345)
         with self.assertRaises(AttributeError):
@@ -128,21 +129,24 @@ class ResourceTestCase(unittest.TestCase):
             res['does_not_exist']
         self.assertEqual(res.category, 'thing')
         self.assertEqual(res['turnover'], 1000)
-        
+
     @requests_mock.mock()
-    def test_get_attribute(self, m):
+    def test_get_items(self, m):
         m.register_uri('GET', 'http://duedil.io/v3/uk/test/12345.json',
-                       json={"response": {'name': 'Duedil',
-                                          'id': 12345,
-                                          'category': 'thing'}
+                       json={"response": {
+                           'name': 'Duedil',
+                           'id': 12345,
+                           'category': 'thing'}
                             })
         res = TestAttrProResource(api_key=API_KEY, id=12345)
         items = res.items()
-        self.assertEqual(list(items), [('name', 'Duedil'), ('id', 12345), ('category', 'thing'), ('turnover', None)])
+        self.assertEqual(list(items), [('name', 'Duedil'),
+                                       ('id', 12345),
+                                       ('category', 'thing'),
+                                       ('turnover', None)])
 
 
 class ProResourceTestCase(unittest.TestCase):
-
 
     @requests_mock.mock()
     def test_load_on_get(self, m):

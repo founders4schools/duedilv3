@@ -104,7 +104,8 @@ class Resource(Mapping):
             raise KeyError(key)
 
     def __iter__(self):
-        attributes = self.attribute_names if 'id' in self.attribute_names else self.attribute_names + ['id']
+        attributes = (self.attribute_names if 'id' in self.attribute_names
+                      else self.attribute_names + ['id'])
         for prop in attributes:
             if hasattr(self, prop):
                 yield prop
