@@ -128,7 +128,7 @@ class Resource(Mapping):
         return False
 
     def __missing__(self, key):
-        raise KeyError('%s in not a valid attribute' % key)
+        raise KeyError('{0!s} in not a valid attribute'.format(key))
 
     def __str__(self):
         return '{} ({})'.format(self.__class__.__name__, self.id)
@@ -192,7 +192,7 @@ class RelatedResourceMeta(ABCMeta):
 
                 if isinstance(resource, six.string_types):
                     module, resource = resource.rsplit('.', 1)
-                    resource = getattr(sys.modules['duedil.resources.%s' % module], resource)
+                    resource = getattr(sys.modules['duedil.resources.{0!s}'.format(module)], resource)
 
                 return self.load_related(endpoint, resource, self.full_endpoint)
 
