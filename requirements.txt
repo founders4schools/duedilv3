@@ -1,0 +1,5 @@
+coverage
+coveralls
+requests>=2,<3
+six
+requests-mock
