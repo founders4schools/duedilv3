@@ -153,7 +153,7 @@ class Client(object):
         return self.search_list_class(results, result_klass, self)
 
     @staticmethod
-    def _build_search_string(self, *args, **kwargs):
+    def _build_search_string(*args, **kwargs):
         data = {}
         try:
             data['q'] = kwargs['query']
@@ -181,7 +181,7 @@ class ProClient(Client):
     search_list_class = ProSearchResourceList
 
     @staticmethod
-    def _build_search_string(self, term_filters, range_filters,
+    def _build_search_string(term_filters, range_filters,
                              order_by=None, limit=None, offset=None,
                              **kwargs):
         data = {}
