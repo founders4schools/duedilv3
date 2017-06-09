@@ -7,8 +7,8 @@ This is a Python implementation of the `DueDil v3 API`_, see the generated
 .. |build-status| image:: https://travis-ci.org/founders4schools/duedilv3.svg?branch=master
     :target: https://travis-ci.org/founders4schools/duedilv3
     :alt: Build
-.. |coverage-status| image:: https://coveralls.io/repos/founders4schools/duedilv3/badge.png
-    :target: https://coveralls.io/r/founders4schools/duedilv3
+.. |coverage-status| image:: https://codecov.io/gh/founders4schools/duedilv3/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/founders4schools/duedilv3
     :alt: Coverage
 .. |pypi| image:: https://badge.fury.io/py/duedil.svg
     :target: http://badge.fury.io/py/duedil
@@ -17,8 +17,8 @@ This is a Python implementation of the `DueDil v3 API`_, see the generated
     :target: https://waffle.io/founders4schools/duedilv3
     :alt: 'Stories in Ready'
 .. |qc| image:: https://www.quantifiedcode.com/api/v1/project/d185f4258c9a4cfa8612b17cffd012c9/badge.svg
-  :target: https://www.quantifiedcode.com/app/project/d185f4258c9a4cfa8612b17cffd012c9
-  :alt: Code issues
+    :target: https://www.quantifiedcode.com/app/project/d185f4258c9a4cfa8612b17cffd012c9
+    :alt: Code issues
 .. |docs| image:: https://readthedocs.org/projects/duedilv3/badge/?version=latest
     :target: https://readthedocs.org/projects/duedilv3/?badge=latest
     :alt: Documentation Status
