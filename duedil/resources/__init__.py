@@ -72,21 +72,15 @@ class Resource(Mapping):
         """
         lazily return attributes, only contact duedil if necessary
         """
-        try:
-            return super(Resource, self).__getattribute__(name)
-        except AttributeError:
-            if name in self.attribute_names:
-                if not self.loaded:
-                    try:
-                        self.load()
-                    except ValueError:
-                        pass
+        if name in self.attribute_names:
+            if not self.loaded:
                 try:
-                    return super(Resource, self).__getattribute__(name)
-                except AttributeError:
-                    raise KeyError()
-            else:
-                raise
+                    self.load()
+                except ValueError:
+                    pass
+            return super(Resource, self).__getattribute__(name)
+        else:
+            raise AttributeError
 
     @property
     def endpoint(self):
@@ -104,15 +98,27 @@ class Resource(Mapping):
         return len(self.attribute_names)
 
     def __getitem__(self, key):
-        return self.__getattr__(key)
+        try:
+            return self.__getattr__(key)
+        except AttributeError:
+            raise KeyError(key)
 
     def __iter__(self):
-        for prop in self.attribute_names + ['id']:
+        attributes = (self.attribute_names if 'id' in self.attribute_names
+                      else self.attribute_names + ['id'])
+        for prop in attributes:
             if hasattr(self, prop):
                 yield prop
             else:
                 setattr(self, prop, None)
                 yield prop
+
+    def items(self):
+        for item in self.__iter__():
+            try:
+                yield item, self[item]
+            except KeyError:
+                yield item, None
 
     def __contains__(self, key):
         if key in self._results.keys():
