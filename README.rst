@@ -1,4 +1,4 @@
-DueDil API v3 |pypi| |build-status| |coverage-status| |waffle| |docs|
+DueDil API v3 |pypi| |build-status| |coverage-status| |waffle| |docs| |qc|
 =====================================================================
 
 This is a Python implementation of the `DueDil v3 API`_, see the generated
@@ -16,7 +16,7 @@ This is a Python implementation of the `DueDil v3 API`_, see the generated
 .. |waffle| image:: https://badge.waffle.io/founders4schools/duedilv3.png?label=ready&title=Ready
     :target: https://waffle.io/founders4schools/duedilv3
     :alt: 'Stories in Ready'
-.. image:: https://www.quantifiedcode.com/api/v1/project/d185f4258c9a4cfa8612b17cffd012c9/badge.svg
+.. |qc| image:: https://www.quantifiedcode.com/api/v1/project/d185f4258c9a4cfa8612b17cffd012c9/badge.svg
   :target: https://www.quantifiedcode.com/app/project/d185f4258c9a4cfa8612b17cffd012c9
   :alt: Code issues
 .. |docs| image:: https://readthedocs.org/projects/duedilv3/badge/?version=latest
