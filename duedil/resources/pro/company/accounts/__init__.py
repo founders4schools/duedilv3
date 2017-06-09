@@ -23,7 +23,7 @@ class Account(RelatedResourceMixin, ProResource):
     full_endpoint = True
 
     def __iter__(self):
-        return iter(dict([(i,getattr(self, i)) for i in self.attribute_names]))
+        return iter({i: getattr(self, i) for i in self.attribute_names})
 
     @property
     def path(self):
