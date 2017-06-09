@@ -146,8 +146,8 @@ class ResourceTestCase(unittest.TestCase):
         items = res.items()
         self.assertEqual(list(items), [('name', 'Duedil'),
                                        ('id', 12345),
-                                       ('category', 'thing'),
-                                       ('turnover', None)])
+                                       ('turnover', None),
+                                       ('category', 'thing')])
 
 
 class ProResourceTestCase(unittest.TestCase):
