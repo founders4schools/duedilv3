@@ -144,10 +144,10 @@ class ResourceTestCase(unittest.TestCase):
                             })
         res = TestAttrProResource(api_key=API_KEY, id=12345)
         items = res.items()
-        self.assertEqual(list(items), [('name', 'Duedil'),
+        self.assertEqual(list(items), [('category', 'thing'),
                                        ('id', 12345),
-                                       ('turnover', None),
-                                       ('category', 'thing')])
+                                       ('name', 'Duedil'),
+                                       ('turnover', None)])
 
 
 class ProResourceTestCase(unittest.TestCase):
