@@ -27,6 +27,6 @@ deploy:
   on:
     tags: true
     distributions: sdist bdist_wheel
-    repo: founders4schools/django-surveys
+    repo: founders4schools/duedilv3
     branch: master
     python: 3.5
