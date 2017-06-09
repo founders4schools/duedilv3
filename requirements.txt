@@ -1,0 +1,5 @@
+coverage
+codecov
+requests>=2,<3
+six
+requests-mock
