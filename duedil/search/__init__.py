@@ -77,7 +77,7 @@ class SearchResource(object):
         return self.id == other
 
     def __str__(self):
-        return 'Search Result: {} ({})'.format(self.name, self.id)
+        return 'Search Result: {0} ({1})'.format(self.name, self.id)
 
 
 

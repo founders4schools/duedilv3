@@ -21,7 +21,7 @@ class ProSearchResourceList(SearchResouceList):
         self._length = page.get('total', len(self.result_list))
 
     def __str__(self):
-        return "Pro Search Result List - total: {}".format(len(self))
+        return "Pro Search Result List - total: {0}".format(len(self))
 
     @property
     def next_url(self):

@@ -23,7 +23,7 @@ class Account(RelatedResourceMixin, ProResource):
     full_endpoint = True
 
     def __iter__(self):
-        return iter(dict([(i,getattr(self, i)) for i in self.attribute_names]))
+        return iter({i: getattr(self, i) for i in self.attribute_names})
 
     @property
     def path(self):
@@ -37,6 +37,6 @@ class Account(RelatedResourceMixin, ProResource):
             module, resource = resource.rsplit('.', 1)
             resource = getattr(sys.modules['duedil.resources.{0!s}'.format(module)], resource)
         resource_obj = self.load_related('details', resource, self.full_endpoint)
-        resource_obj.path = '{}'.format(self.path)
+        resource_obj.path = '{0}'.format(self.path)
         resource_obj.loaded = True
         return resource_obj

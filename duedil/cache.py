@@ -40,7 +40,7 @@ def kwargs_key_generator(namespace, fn, **kw):
     def generate_key(*args, **kwargs):
         args_str = "_".join(str(s) for s in args)
         kwargs_str = json.dumps(kwargs)
-        key = '{}_{}:{}_{}'.format(namespace, fname, args_str, kwargs_str)
+        key = '{0}_{1}:{2}_{3}'.format(namespace, fname, args_str, kwargs_str)
         hashkey = hashlib.md5(key.encode('utf-8'))
         return hashkey.hexdigest()
     return generate_key

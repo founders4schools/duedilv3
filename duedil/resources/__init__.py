@@ -131,7 +131,7 @@ class Resource(Mapping):
         raise KeyError('{0!s} in not a valid attribute'.format(key))
 
     def __str__(self):
-        return '{} ({})'.format(self.__class__.__name__, self.id)
+        return '{0} ({1})'.format(self.__class__.__name__, self.id)
 
     def __eq__(self, other):
         return self.id == other.id

@@ -86,7 +86,7 @@ class Client(object):
         try:
             self.base_url = API_URLS.get(self.api_type, 'lite')
         except AttributeError:
-            raise ValueError('Duedil API type must be "{}"'.format('", "'.join(API_URLS.keys())))
+            raise ValueError('Duedil API type must be "{0}"'.format('", "'.join(API_URLS.keys())))
 
         # Are we in a sandbox?
         self.sandbox = sandbox
@@ -118,7 +118,7 @@ class Client(object):
 
         if self.api_type in ["pro", "lite"]:
             data_format = 'json'
-            resp_format = '.{}'.format(data_format)
+            resp_format = '.{0}'.format(data_format)
         else:
             resp_format = ''
 
@@ -164,7 +164,7 @@ class Client(object):
         raise NotImplementedError
 
     def __str__(self):
-        return 'Duedil Client type:{}'.format(self.api_type)
+        return 'Duedil Client type:{0}'.format(self.api_type)
 
 class LiteClient(Client):
     api_type = 'lite'
@@ -299,13 +299,13 @@ class InternationalClient(Client):
     search_list_class = InternationalSearchResourceList
 
     def search(self, country_code, query):
-        endpoint = '{}/search'.format(country_code)
+        endpoint = '{0}/search'.format(country_code)
         return self._search(endpoint, InternationalCompanySearchResult, query=query)
 
     def get(self, country_code, endpoint, data):
-        endpoint = '{}/{}'.format(country_code, endpoint)
+        endpoint = '{0}/{1}'.format(country_code, endpoint)
         return self._get(endpoint, data)
 
     # this should be a Resource and not here...
     def report(self, country_code, id):
-        return self.get(country_code, 'report/{}'.format(id), {})
+        return self.get(country_code, 'report/{0}'.format(id), {})
