@@ -182,7 +182,7 @@ class SearchableResourceMeta(type):
 
 class RelatedResourceMeta(ABCMeta):
 
-    def __init__(klass, _name, _bases, ns):
+    def __init__(cls, _name, _bases, ns):
         related_resources = ns.get('related_resources') or {}
         for ep in related_resources.keys():
 
@@ -197,7 +197,7 @@ class RelatedResourceMeta(ABCMeta):
                 return self.load_related(endpoint, resource, self.full_endpoint)
 
             attr_name = ep.replace('-', '_')
-            setattr(klass, attr_name,
+            setattr(cls, attr_name,
                     property(getter, None, None, attr_name))
 
 
