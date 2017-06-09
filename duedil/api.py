@@ -50,7 +50,7 @@ API_URLS = {
     'lite': 'http://api.duedil.com/open',
     'international': 'http://api.duedil.com/international',
 }
-API_KEY = os.environ.get('DUEDIL_API_KEY', None)
+API_KEY = os.environ.get('DUEDIL_API_KEY')
 
 class APILimitException(Exception):
     pass
@@ -152,6 +152,7 @@ class Client(object):
         # return [result_klass(self, **r) for r in results.get('response',{}).get('data', {})]
         return self.search_list_class(results, result_klass, self)
 
+    @staticmethod
     def _build_search_string(self, *args, **kwargs):
         data = {}
         try:
@@ -179,6 +180,7 @@ class ProClient(Client):
     api_type = 'pro'
     search_list_class = ProSearchResourceList
 
+    @staticmethod
     def _build_search_string(self, term_filters, range_filters,
                              order_by=None, limit=None, offset=None,
                              **kwargs):
