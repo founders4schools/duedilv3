@@ -98,6 +98,8 @@ class Resource(Mapping):
         return len(self.attribute_names)
 
     def __getitem__(self, key):
+        if key == 'id':
+            return self.id
         try:
             return self.__getattr__(key)
         except AttributeError:
