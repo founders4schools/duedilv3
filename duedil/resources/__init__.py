@@ -148,7 +148,7 @@ class ProResource(Resource):
         """
         self._result = self.client.get(self.endpoint)
         self.loaded = True
-        self._set_attributes(**self._result['response'])
+        self._set_attributes(**self._result.get('response', {}))
 
 
 # Here be metaclass dragons that don't make complete sense as to why we have them
